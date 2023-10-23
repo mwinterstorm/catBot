@@ -5,10 +5,11 @@
   "main": "main.ts",
   "scripts": {
     "build": "npx tsc",
-    "start": "node dist/main.js",
-    "dev": "NODE_ENV=development.local nodemon src/main.ts",
+    "start": "node dist/main.ts",
+    "dev": "NODE_ENV=development.local nodemon -x node --no-warnings --loader ts-node/esm src/main.ts",
     "deploy": "NODE_ENV=production node src/main.ts"
   },
+  "type":"module",
   "nodemonConfig": {
     "ignore": [
       "catbot.json"
