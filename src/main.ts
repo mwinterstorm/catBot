@@ -1,7 +1,7 @@
-import express, { Express, Request, Response, Application } from 'express';
+import express, { Request, Response, Application } from 'express';
 import dotenv from 'dotenv';
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
-import { MatrixAuth, MatrixClient, SimpleFsStorageProvider, AutojoinRoomsMixin, RustSdkCryptoStorageProvider, MatrixEvent } from 'matrix-bot-sdk';
+import { MatrixAuth, MatrixClient, SimpleFsStorageProvider, AutojoinRoomsMixin, RustSdkCryptoStorageProvider } from 'matrix-bot-sdk';
 import mongoose from 'mongoose';
 
 import { initialiseDB } from './setup/initialiseDB';
@@ -29,7 +29,6 @@ if (homeserverUrl == 'invalid_homeserver') {
 
 const accessToken = process.env.BOT_TOKEN || 'invalid_token';
 if (accessToken != 'invalid_token') {
-
     const cryptoProvider = new RustSdkCryptoStorageProvider("./crypt");
     const client = new MatrixClient(homeserverUrl, accessToken, storage, cryptoProvider);
     AutojoinRoomsMixin.setupOnClient(client);
