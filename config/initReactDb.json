@@ -104,6 +104,21 @@
                 "pluralOk": false
             }
         ],
-        "emote": ":nerd_face:"
-    }
+        "emote": ":nerd_face:",
+        "modifiers": [
+            {
+                "word": ["1","2"],
+                "canPossess": false,
+                "caseSensitive": false,
+                "pluralOk": false,
+                "overrideEmote": ":partying:"
+            },
+            {
+                "word": ["5","6"],
+                "canPossess": false,
+                "caseSensitive": false,
+                "pluralOk": false,
+                "overrideEmote": ":scream_cat:"
+            }
+
 ]
