@@ -6,7 +6,8 @@ import mongoose from 'mongoose';
 
 import { initialiseDB } from './setup/initialiseDB';
 import { catbotReacts } from './modules/catbotReacts';
-import { catbotResponds } from './modules/catbotResponds';
+// import { catbotResponds } from './modules/catbotResponds';
+import * as nightscout from './modules/nightscout'
 
 const storage = new SimpleFsStorageProvider("catbot.json");
 
@@ -17,6 +18,7 @@ try {
     await mongoose.connect(`mongodb://${mdbURL}/${mdbDatabase}`)
     console.log('meow! DB connected');
     initialiseDB()
+    // nightscout.get()
 } catch (err) {
     console.error(err)
 }
@@ -35,10 +37,13 @@ if (accessToken != 'invalid_token') {
     client.start().then(() => console.log("meow! catBot started!"));
 
     async function handleCommand(roomId: string, event: any) {
+        console.log(event.content['m.mentions'].user_ids);
+        
         const body = event['content']['body'];
         const sender = event.sender
         const timeS = new Date(event.origin_server_ts).toLocaleString()
         const eId = event.event_id
+        const mentions = event.content['m.mentions'].user_ids
         console.log(timeS + ' - ' + sender + ': ' + body);
 
         // Don't handle unhelpful events (ones that aren't text messages, are redacted, or sent by us)
@@ -46,7 +51,7 @@ if (accessToken != 'invalid_token') {
         if (event['content']?.['msgtype'] !== 'm.text') return;
 
         // CATBOT REACTS
-        const reaction = await catbotReacts(body, eId)
+        const reaction = await catbotReacts(body, eId, mentions, await client.getUserId())
         if (reaction.react) {            
             await client.sendRawEvent(roomId,'m.reaction',{'m.relates_to':{event_id:reaction.eId,key:reaction.emote,rel_type:'m.annotation'}})
         }
@@ -55,7 +60,8 @@ if (accessToken != 'invalid_token') {
         // const response = await catbotResponds(body, eId)
         // console.log(response);
         
-
+        // NIGHTSCOUT INTEGRATION
+        // if (body?.startsWith('!meow') || )
 
 
         
@@ -78,8 +84,9 @@ if (accessToken != 'invalid_token') {
     const app: Application = express();
     const port = process.env.PORT || 5508;
 
-    app.get('/', (req: Request, res: Response) => {
-        res.json({ meow: 'meow! catbot is a-ok!', });
+    app.get('/', async (req: Request, res: Response) => {
+        const sugar = await nightscout.getCurrentSugar()
+        res.json({ meow: 'meow! catbot is a-ok!', ns: sugar });
     });
 
     app.listen(port, () => {

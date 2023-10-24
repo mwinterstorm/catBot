@@ -26,7 +26,7 @@ export const reactSchema = new mongoose.Schema<intReactions>({
 
 export const reaction = mongoose.model('reaction', reactSchema);
 
-export async function catbotReacts(message: String, eId: String) {
+export async function catbotReacts(message: String, eId: String, mentions: String[], catbotId: String) {
     let arr = message.split(' ')
     for (let i = 0; i < arr.length; i++) {
         const regex = new RegExp(`\\b(${arr[i]})\\b`, 'i')
@@ -60,7 +60,11 @@ export async function catbotReacts(message: String, eId: String) {
             return item
         }
     }
-
+    // React to mention of self
+    if (mentions.includes(catbotId)){
+        const item = { emote: emoji.emojify(':cat:'), eId: eId, react: true }                          
+        return item
+    }
     // IF NO REACT
     const item = { react: false, eId: eId, emote: null, }
     return item
