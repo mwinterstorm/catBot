@@ -14,16 +14,19 @@ I'm redoing [catBot_red](https://github.com/mwinterstorm/catbot_red) (a matrix b
 1. [ ] Unifi Protect
 
 ## Admin
-1. [ ] Admin dash to add react phrases / enable integrations etc (currently through config JSON files)
+1. [ ] Admin dash to add react phrases etc / enable integrations etc (currently through config JSON files)
 1. [ ] Installation script to set up DB and write .env file
 
 # Config
 1. For all files in /config, appending .local to the name will override the defaults
 1. You can edit these files to add more reactions, e.g.:
     1. initReactDb.json - is what the emote reactions DB is initialised with
-    1. ~~currently only initialises these once, you will need to delete db records to amend an existing entry (it will add new entries)~~ will update record if changed on catbot restart
+    1. will update reactDB if changed on each catbot restart ~~currently only initialises these once, you will need to delete db records to amend an existing entry (it will add new entries)~~ 
 
 # Installation
 1. Need to install and run mongoDB (e.g. on macos run ```brew services run mongodb-community```)
-1. Script coming soon
+1. run deploy with pm2 using local .env: ```NODE_ENV=development.local pm2 start -n catbot node -- --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/main.ts```
+1. Script coming soonish to install / start database / set up local .env
+
+
    
