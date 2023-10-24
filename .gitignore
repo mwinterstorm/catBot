@@ -134,3 +134,4 @@ dist
 catbot.json
 /crypt/*
 notes.md
+*.local
