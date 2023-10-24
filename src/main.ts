@@ -6,13 +6,12 @@ import mongoose from 'mongoose';
 
 import { initialiseDB } from './setup/initialiseDB';
 import { catbotReacts } from './modules/catbotReacts';
-import * as emoji from 'node-emoji'
-
+import { catbotResponds } from './modules/catbotResponds';
 
 const storage = new SimpleFsStorageProvider("catbot.json");
 
 // Data storage
-const mdbURL = '127.0.0.1:27017'
+const mdbURL = process.env.DB_URL + ':' + process.env.DB_PORT
 const mdbDatabase = 'catbot'
 try {
     await mongoose.connect(`mongodb://${mdbURL}/${mdbDatabase}`)
@@ -52,8 +51,14 @@ if (accessToken != 'invalid_token') {
             await client.sendRawEvent(roomId,'m.reaction',{'m.relates_to':{event_id:reaction.eId,key:reaction.emote,rel_type:'m.annotation'}})
         }
 
+        // CATBOT RESPONDS
+        // const response = await catbotResponds(body, eId)
+        // console.log(response);
+        
 
 
+
+        
 
 
 
@@ -66,7 +71,7 @@ if (accessToken != 'invalid_token') {
         // Put in functions that only run randomly under here
         let chance = Math.random()
         if (chance <= 0.001) {
-            await client.replyNotice(roomId, event,'Meow! It\'s me CatBot!' ,'Meow! It\'s me CatBot! 🐱' + emoji.emojify(':robot:'));
+            await client.replyNotice(roomId, event,'Meow! It\'s me CatBot!' ,'Meow! It\'s me CatBot! 🐱🤖');
         } 
     }
 
