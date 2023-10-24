@@ -1,5 +1,5 @@
 import ns from './nightscout/http'
-import { intSugar } from '../interfaces'
+import { intSugar } from './nightscout/interfaces'
 
 async function getCurrentSugar () {
     const d = await ns.get('/api/v1/entries/sgv?count=1')
