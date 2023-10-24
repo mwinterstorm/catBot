@@ -38,7 +38,7 @@ if (accessToken != 'invalid_token') {
 
     async function handleCommand(roomId: string, event: any) {
         const catSelf = await client.getUserId()
-        
+
         const body = event['content']['body'];
         const sender = event.sender
         const timeS = new Date(event.origin_server_ts).toLocaleString()
@@ -53,29 +53,44 @@ if (accessToken != 'invalid_token') {
 
         // CATBOT REACTS
         const reaction = await catbotReacts(body, eId, mentions, catSelf)
-        if (reaction.react) {            
-            await client.sendRawEvent(roomId,'m.reaction',{'m.relates_to':{event_id:reaction.eId,key:reaction.emote,rel_type:'m.annotation'}})
+        if (reaction.react) {
+            await client.sendRawEvent(roomId, 'm.reaction', { 'm.relates_to': { event_id: reaction.eId, key: reaction.emote, rel_type: 'm.annotation' } })
         }
 
         // CATBOT RESPONDS
         // const response = await catbotResponds(body, eId)
         // console.log(response);
-        
+
         // TRIGGERED INTEGRATIONS
-        if (body?.startsWith('!meow') || mentions.includes(catSelf) ) {
+        if (body?.startsWith('!meow') || mentions.includes(catSelf)) {
             // NIGHTSCOUT INTEGRATION
             if (process.env.NIGHTSCOUT) {
                 const actions = [/\bsugar\b/i, /\bdiabetes\b/i]
                 const active: any = await helpers.checkActionWords(actions, body) || false;
-                if (active.action && active.action == 'help') {
+                if (active.action == 'help') {
                     console.log('gather actions for help');
                     console.log(active.actions);
-                } else if (active) {
+                } else if (active.active) {
                     // NIGHTSCOUT LOGIC
                     const sugarMsg = await nightscout.getCurrentSugarMsg()
-                    await client.sendHtmlNotice(roomId,sugarMsg.html)
+                    await client.sendHtmlNotice(roomId, sugarMsg.html)
                 }
             }
+
+            // Universal commands
+            const actions = [/\babout\b/i, /\bversion\b/i,]
+            const active: any = await helpers.checkActionWords(actions, body) || {active: false,action: 'none',actions: []}            
+            if (active.action == 'help') {
+                console.log('gather actions for help');
+                console.log(active.actions);
+            } else if (active.action == 'about') {
+                const res = await helpers.getAbout()
+                await client.sendHtmlNotice(roomId,'meow! Let me tell you about <b>' + res.name +  '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)
+            } else if (active.action == 'version') {
+                const res = await helpers.getAbout()
+                await client.sendHtmlNotice(roomId,'meow! <b>' + res.name +  '</b> version is <b>' + res.version + '</b>')
+            }
+
         }
 
 
@@ -83,8 +98,8 @@ if (accessToken != 'invalid_token') {
 
         // Put in functions that run randomly on messages under here
         if (Math.random() <= 0.001) {
-            await client.replyNotice(roomId, event,'Meow! It\'s me CatBot!' ,'Meow! It\'s me CatBot! 🐱🤖');
-        } 
+            await client.replyNotice(roomId, event, 'Meow! It\'s me CatBot!', 'Meow! It\'s me CatBot! 🐱🤖');
+        }
     }
 
     const app: Application = express();

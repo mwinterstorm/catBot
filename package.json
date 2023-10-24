@@ -1,6 +1,6 @@
 {
   "name": "catbot",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A personal and lovably naughty matrix assistant",
   "main": "main.ts",
   "scripts": {
@@ -26,7 +26,8 @@
     "matrix-bot-sdk": "^0.6.6",
     "mongodb": "^6.2.0",
     "mongoose": "^7.6.3",
-    "node-emoji": "^2.1.0"
+    "node-emoji": "^2.1.0",
+    "regex-to-strings": "^2.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.15",
