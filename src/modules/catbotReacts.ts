@@ -7,6 +7,7 @@ const reactTriggerSchema = new mongoose.Schema<intReactTrigger>({
     caseSensitive: { type: Boolean, required: true },
     pluralOk: { type: Boolean, required: true },
     canPossess: { type: Boolean, required: true },
+    overrideEmote: { type: String, required: false },
 })
 
 export const reactSchema = new mongoose.Schema<intReactions>({
@@ -16,6 +17,10 @@ export const reactSchema = new mongoose.Schema<intReactions>({
         required: true,
     },
     emote: { type: String, required: true },
+    modifiers: {
+        type: [reactTriggerSchema],
+        required: false,
+    },
 });
 
 export const reaction = mongoose.model('reaction', reactSchema);
@@ -25,7 +30,25 @@ export async function catbotReacts(message: String, eId: String) {
     for (let i = 0; i < arr.length; i++) {
         const regex = new RegExp(`\\b(${arr[i]})\\b`, 'i')
         if (await reaction.exists({ 'trigger.word': regex })) {
-            const res: intReactions = await reaction.findOne({ 'trigger.word': { $regex: regex } }, { 'reactType': 1, 'trigger.$': 1, 'emote': 1 }).lean() || { trigger: [], emote: '' }
+            const res: intReactions = await reaction.findOne({ 'trigger.word': { $regex: regex } }, { 'reactType': 1, 'trigger.$': 1, 'emote': 1, 'modifiers': 1 }).lean() || { trigger: [], emote: '' }
+            
+            // CHECK IF BASE REACT MODIFIED
+            if (res.modifiers && res.modifiers.length > 0) {
+                for (let m = 0; m < res.modifiers.length; m++) {
+                    for (let w = 0; w < res.modifiers[m].word.length; w++) {
+                        const regMod = new RegExp(`\\b(${res.modifiers[m].word[w]})\\b`, 'gi')
+                        if (regMod.test(message.toString())) {
+                            const emote = emoji.emojify(res.modifiers[m].overrideEmote?.toString() || '') || '';
+                            console.log(emote);
+                            
+                            const item = (emote != '') ? {emote: emote,eId: eId,react: true} : {emote: '',eId: eId,react: false} 
+                            return item
+                        }
+                    }
+                }
+            }
+
+            // OTHERWISE FIND EMOTE
             const emote = await (
                 (!res.trigger[0].caseSensitive) ? 
                 emoji.emojify(res.emote.toString()) : 
@@ -37,6 +60,8 @@ export async function catbotReacts(message: String, eId: String) {
             return item
         }
     }
+
+    // IF NO REACT
     const item = {react: false,eId: eId,emote: null,}
     return item
 }
