@@ -1,9 +1,26 @@
 import express, { Express, Request, Response, Application } from 'express';
 import dotenv from 'dotenv';
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
-import { MatrixAuth, MatrixClient, SimpleFsStorageProvider, AutojoinRoomsMixin, RustSdkCryptoStorageProvider } from 'matrix-bot-sdk';
+import { MatrixAuth, MatrixClient, SimpleFsStorageProvider, AutojoinRoomsMixin, RustSdkCryptoStorageProvider, MatrixEvent } from 'matrix-bot-sdk';
+import mongoose from 'mongoose';
+
+import { initialiseDB } from './setup/initialiseDB';
+import { catbotReacts } from './modules/catbotReacts';
+import * as emoji from 'node-emoji'
+
 
 const storage = new SimpleFsStorageProvider("catbot.json");
+
+// Data storage
+const mdbURL = '127.0.0.1:27017'
+const mdbDatabase = 'catbot'
+try {
+    await mongoose.connect(`mongodb://${mdbURL}/${mdbDatabase}`)
+    console.log('meow! DB connected');
+    initialiseDB()
+} catch (err) {
+    console.error(err)
+}
 
 const homeserverUrl = process.env.MATRIX_BASE_URL || 'invalid_homeserver';
 if (homeserverUrl == 'invalid_homeserver') {
@@ -23,11 +40,23 @@ if (accessToken != 'invalid_token') {
         const body = event['content']['body'];
         const sender = event.sender
         const timeS = new Date(event.origin_server_ts).toLocaleString()
+        const eId = event.event_id
         console.log(timeS + ' - ' + sender + ': ' + body);
 
         // Don't handle unhelpful events (ones that aren't text messages, are redacted, or sent by us)
-        if (event['content']?.['msgtype'] !== 'm.text') return;
         if (event['sender'] === await client.getUserId()) return;
+        if (event['content']?.['msgtype'] !== 'm.text') return;
+
+        // CATBOT REACTS
+        const reaction = await catbotReacts(body, eId)
+        if (reaction.react) {
+            await client.sendRawEvent(roomId,'m.reaction',{'m.relates_to':{event_id:reaction.eId,key:reaction.emote,rel_type:'m.annotation'}})
+        }
+
+
+
+
+
 
         // Check to ensure that the `!hello` command is being run
         // if (!body?.startsWith("!hello")) return;
@@ -35,9 +64,11 @@ if (accessToken != 'invalid_token') {
         // Now that we've passed all the checks, we can actually act upon the command
         // console.log("here");
 
-        if (Math.random() <= 0.01) {
-            await client.replyNotice(roomId, event, "Hi! It's me CatBot!");
-        }
+        // Put in functions that only run randomly under here
+        let chance = Math.random()
+        if (chance <= 0.001) {
+            await client.replyNotice(roomId, event,'Meow! It\'s me CatBot!' ,'Meow! It\'s me CatBot! 🐱' + emoji.emojify(':robot:'));
+        } 
     }
 
     const app: Application = express();
