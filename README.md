@@ -7,15 +7,25 @@ I'm redoing [catBot_red](https://github.com/mwinterstorm/catbot_red) (a matrix b
 1. [ ] Message replies
 1. [ ] Updates its profile pic from cat pictures
 1. [ ] Cat facts from cat fact api
+1. [ ] Weather
 
 ## Integrations
 1. [ ] Nightscout 
+    1. [x] ```sugar``` - reply with current sugar
+    1. [ ] ```sugar graph``` - reply with graph of past 4 hours sugar
+    1. [ ] automatic blood sugar alerts
 1. [ ] Home Assistant
+    1 [ ] get locations of everyone
 1. [ ] Unifi Protect
+    1. Doorbell / camera integration
+1. [ ] fireApp / yahoo finance
+    1. [ ] automatic daily summary
 
-## Admin
+## Admin / other
+1. [ ] implement user roles 
 1. [ ] Admin dash to add react phrases etc / enable integrations etc (currently through config JSON files)
 1. [ ] Installation script to set up DB and write .env file
+
 
 # Config
 1. For all files in /config, appending .local to the name will override the defaults
