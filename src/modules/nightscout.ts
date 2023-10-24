@@ -21,7 +21,7 @@ async function getCurrentSugar () {
 
 async function getCurrentSugarMsg() {
     const sugar = await getCurrentSugar() 
-    const html = "<p>Meow!<br><br>Sugar is <b>" + sugar.mmoll + "</b><br><br>It is <em>" + sugar.direction + "</em> (" + sugar.delta + ")<br>Reading is " + sugar.timeAgo + " old"   
+    const html = "<p>Meow!<br>Sugar is <b>" + sugar.mmoll + "</b><br>It is <em>" + sugar.direction + "</em> (" + sugar.delta + ")<br>Reading is " + sugar.timeAgo + " mins old"   
     const response = {
         plain: 'meow!' + sugar.time + ' (' + sugar.timeAgo + ') - Sugar is ' + sugar.mmoll + ' and ' + sugar.direction,
         html:  html
