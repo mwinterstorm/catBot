@@ -4,6 +4,7 @@ import * as emoji from 'node-emoji'
 
 const reactTriggerSchema = new mongoose.Schema<intReactTrigger>({
     word: { type: [String], required: true },
+    regex: { type: String, required: false },
     caseSensitive: { type: Boolean, required: true },
     pluralOk: { type: Boolean, required: true },
     canPossess: { type: Boolean, required: true },
@@ -31,37 +32,37 @@ export async function catbotReacts(message: String, eId: String) {
         const regex = new RegExp(`\\b(${arr[i]})\\b`, 'i')
         if (await reaction.exists({ 'trigger.word': regex })) {
             const res: intReactions = await reaction.findOne({ 'trigger.word': { $regex: regex } }, { 'reactType': 1, 'trigger.$': 1, 'emote': 1, 'modifiers': 1 }).lean() || { trigger: [], emote: '' }
-            
-            // CHECK IF BASE REACT MODIFIED
-            if (res.modifiers && res.modifiers.length > 0) {
+
+            // CHECK IF BASE REACT MODIFIED BY REGEX
+            if (res.modifiers && res.modifiers.length > 0 && res.modifiers) {
                 for (let m = 0; m < res.modifiers.length; m++) {
-                    for (let w = 0; w < res.modifiers[m].word.length; w++) {
-                        const regMod = new RegExp(`\\b(${res.modifiers[m].word[w]})\\b`, 'gi')
-                        if (regMod.test(message.toString())) {
+                    if (res.modifiers[m].regex) {
+                        const regTest = new RegExp(res.modifiers[m].regex?.toString() || '', 'gi')
+                        if (regTest.test(message.toString())) {
                             const emote = emoji.emojify(res.modifiers[m].overrideEmote?.toString() || '') || '';
-                            console.log(emote);
-                            
-                            const item = (emote != '') ? {emote: emote,eId: eId,react: true} : {emote: '',eId: eId,react: false} 
+                            const item = (emote != '') ? { emote: emote, eId: eId, react: true } : { emote: '', eId: eId, react: false }                            
                             return item
+
                         }
                     }
                 }
             }
-
+            
             // OTHERWISE FIND EMOTE
             const emote = await (
-                (!res.trigger[0].caseSensitive) ? 
-                emoji.emojify(res.emote.toString()) : 
-                (reaction.findOne({ 'trigger.word': { $regex: new RegExp(`\\b(${arr[i]})\\b`) } }, { 'reactType': 1, 'trigger.$': 1, 'emote': 1 }).lean().then(res => { 
-                if (res && res.emote) {
-                    return emoji.emojify(res.emote.toString())
-                }}))) || ''
-            const item = (emote != '') ? {emote: emote,eId: eId,react: true} : {emote: '',eId: eId,react: false} 
+                (!res.trigger[0].caseSensitive) ?
+                    emoji.emojify(res.emote.toString()) :
+                    (reaction.findOne({ 'trigger.word': { $regex: new RegExp(`\\b(${arr[i]})\\b`) } }, { 'reactType': 1, 'trigger.$': 1, 'emote': 1 }).lean().then(res => {
+                        if (res && res.emote) {
+                            return emoji.emojify(res.emote.toString())
+                        }
+                    }))) || ''
+            const item = (emote != '') ? { emote: emote, eId: eId, react: true } : { emote: '', eId: eId, react: false }
             return item
         }
     }
 
     // IF NO REACT
-    const item = {react: false,eId: eId,emote: null,}
+    const item = { react: false, eId: eId, emote: null, }
     return item
 }
