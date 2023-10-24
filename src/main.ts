@@ -48,7 +48,7 @@ if (accessToken != 'invalid_token') {
 
         // CATBOT REACTS
         const reaction = await catbotReacts(body, eId)
-        if (reaction.react) {
+        if (reaction.react) {            
             await client.sendRawEvent(roomId,'m.reaction',{'m.relates_to':{event_id:reaction.eId,key:reaction.emote,rel_type:'m.annotation'}})
         }
 
