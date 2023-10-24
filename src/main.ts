@@ -4,10 +4,11 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 import { MatrixAuth, MatrixClient, SimpleFsStorageProvider, AutojoinRoomsMixin, RustSdkCryptoStorageProvider } from 'matrix-bot-sdk';
 import mongoose from 'mongoose';
 
+import helpers from './helpers'
 import { initialiseDB } from './setup/initialiseDB';
 import { catbotReacts } from './modules/catbotReacts';
 // import { catbotResponds } from './modules/catbotResponds';
-import * as nightscout from './modules/nightscout'
+import nightscout from './modules/nightscout'
 
 const storage = new SimpleFsStorageProvider("catbot.json");
 
@@ -18,7 +19,6 @@ try {
     await mongoose.connect(`mongodb://${mdbURL}/${mdbDatabase}`)
     console.log('meow! DB connected');
     initialiseDB()
-    // nightscout.get()
 } catch (err) {
     console.error(err)
 }
@@ -37,21 +37,22 @@ if (accessToken != 'invalid_token') {
     client.start().then(() => console.log("meow! catBot started!"));
 
     async function handleCommand(roomId: string, event: any) {
-        console.log(event.content['m.mentions'].user_ids);
+        const catSelf = await client.getUserId()
         
         const body = event['content']['body'];
         const sender = event.sender
         const timeS = new Date(event.origin_server_ts).toLocaleString()
         const eId = event.event_id
-        const mentions = event.content['m.mentions'].user_ids
+        const mentions = (event.content['m.mentions']?.user_ids) ? event.content['m.mentions'].user_ids : ['none']
+
         console.log(timeS + ' - ' + sender + ': ' + body);
 
         // Don't handle unhelpful events (ones that aren't text messages, are redacted, or sent by us)
-        if (event['sender'] === await client.getUserId()) return;
+        if (event['sender'] === catSelf) return;
         if (event['content']?.['msgtype'] !== 'm.text') return;
 
         // CATBOT REACTS
-        const reaction = await catbotReacts(body, eId, mentions, await client.getUserId())
+        const reaction = await catbotReacts(body, eId, mentions, catSelf)
         if (reaction.react) {            
             await client.sendRawEvent(roomId,'m.reaction',{'m.relates_to':{event_id:reaction.eId,key:reaction.emote,rel_type:'m.annotation'}})
         }
@@ -60,23 +61,28 @@ if (accessToken != 'invalid_token') {
         // const response = await catbotResponds(body, eId)
         // console.log(response);
         
-        // NIGHTSCOUT INTEGRATION
-        // if (body?.startsWith('!meow') || )
+        // TRIGGERED INTEGRATIONS
+        if (body?.startsWith('!meow') || mentions.includes(catSelf) ) {
+            // NIGHTSCOUT INTEGRATION
+            if (process.env.NIGHTSCOUT) {
+                const actions = [/\bsugar\b/i, /\bdiabetes\b/i]
+                const active: any = await helpers.checkActionWords(actions, body) || false;
+                if (active.action && active.action == 'help') {
+                    console.log('gather actions for help');
+                    console.log(active.actions);
+                } else if (active) {
+                    // NIGHTSCOUT LOGIC
+                    const sugarMsg = await nightscout.getCurrentSugarMsg()
+                    await client.sendHtmlNotice(roomId,sugarMsg.html)
+                }
+            }
+        }
 
 
-        
 
 
-
-        // Check to ensure that the `!hello` command is being run
-        // if (!body?.startsWith("!hello")) return;
-
-        // Now that we've passed all the checks, we can actually act upon the command
-        // console.log("here");
-
-        // Put in functions that only run randomly under here
-        let chance = Math.random()
-        if (chance <= 0.001) {
+        // Put in functions that run randomly on messages under here
+        if (Math.random() <= 0.001) {
             await client.replyNotice(roomId, event,'Meow! It\'s me CatBot!' ,'Meow! It\'s me CatBot! 🐱🤖');
         } 
     }
@@ -85,8 +91,7 @@ if (accessToken != 'invalid_token') {
     const port = process.env.PORT || 5508;
 
     app.get('/', async (req: Request, res: Response) => {
-        const sugar = await nightscout.getCurrentSugar()
-        res.json({ meow: 'meow! catbot is a-ok!', ns: sugar });
+        res.json({ meow: 'meow! catbot is a-ok!' });
     });
 
     app.listen(port, () => {
