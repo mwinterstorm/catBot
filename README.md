@@ -13,5 +13,6 @@ I'm redoing [catBot_red](https://github.com/mwinterstorm/catbot_red) (a matrix b
 1. [ ] Home Assistant
 1. [ ] Unifi Protect
 
-
+# Installation
+1. Need to install and run mongoDB (e.g. on macos run ```brew services run mongodb-community```)
    
