@@ -11,5 +11,5 @@ assignees: mwinterstorm
 High level overview of feature
 
 # To Do 
-[ ] Specific things to do #1
-[ ] Specific things to do #2
+- [ ] Specific things to do #1
+- [ ] Specific things to do #2
