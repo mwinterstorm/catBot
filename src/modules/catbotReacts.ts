@@ -42,7 +42,6 @@ export async function catbotReacts(message: String, eId: String) {
                             const emote = emoji.emojify(res.modifiers[m].overrideEmote?.toString() || '') || '';
                             const item = (emote != '') ? { emote: emote, eId: eId, react: true } : { emote: '', eId: eId, react: false }                            
                             return item
-
                         }
                     }
                 }
