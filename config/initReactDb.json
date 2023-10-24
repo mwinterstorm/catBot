@@ -1,0 +1,109 @@
+[
+    {
+        "reactType": "catbot",
+        "trigger": [
+            {
+                "word": [
+                    "catbot"
+                ],
+                "caseSensitive": false,
+                "pluralOk": true,
+                "canPossess": true
+            }
+        ],
+        "emote": ":cat:"
+    },
+    {
+        "reactType": "cats",
+        "trigger": [
+            {
+                "word": [
+                    "kitty",
+                    "kitties"
+                ],
+                "caseSensitive": false,
+                "pluralOk": false,
+                "canPossess": true
+            },
+            {
+                "word": [
+                    "cat",
+                    "kitten"
+                ],
+                "caseSensitive": false,
+                "pluralOk": true,
+                "canPossess": true
+            }
+        ],
+        "emote": ":heart_eyes_cat:"
+    },
+    {
+        "reactType": "dogs",
+        "trigger": [
+            {
+                "word": [
+                    "dog"
+                ],
+                "canPossess": true,
+                "caseSensitive": false,
+                "pluralOk": true
+            },
+            {
+                "word": [
+                    "doggy",
+                    "doggies",
+                    "puppy",
+                    "puppies"
+                ],
+                "canPossess": true,
+                "caseSensitive": false,
+                "pluralOk": false
+            }
+        ],
+        "emote": ":pouting_cat:"
+    },
+    {
+        "reactType": "holiday",
+        "trigger": [
+            {
+                "word": [
+                    "holiday",
+                    "holidays",
+                    "time off"
+                ],
+                "canPossess": false,
+                "caseSensitive": false,
+                "pluralOk": false
+            }
+        ],
+        "emote": ":sunglasses:"
+    },
+    {
+        "reactType": "vomit",
+        "trigger": [
+            {
+                "word": [
+                    "work"
+                ],
+                "canPossess": false,
+                "caseSensitive": false,
+                "pluralOk": false
+            }
+        ],
+        "emote": ":vomiting_face:"
+    },
+    {
+        "reactType": "wordle",
+        "trigger": [
+            {
+                "word": [
+                    "wordle"
+                ],
+                "canPossess": false,
+                "caseSensitive": false,
+                "pluralOk": false
+            }
+        ],
+        "emote": ":nerd_face:"
+    }
+]
