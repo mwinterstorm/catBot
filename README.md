@@ -35,8 +35,16 @@ I'm redoing [catBot_red](https://github.com/mwinterstorm/catbot_red) (a matrix b
 
 # Installation
 1. Need to install and run mongoDB (e.g. on macos run ```brew services run mongodb-community```)
-1. run deploy with pm2 using local .env: ```NODE_ENV=development.local pm2 start -n catbot node -- --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/main.ts```
+1. pull repo ```gh repo clone mwinterstorm/catBot```
+1. install dependancies ```npm install```
+1. run 
+    - deploy with pm2 using local .env: ```NODE_ENV=development.local pm2 start -n catbot node -- --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/main.ts```
+    - without pm2  ```node --no-warnings --experimental-specifier-resolution=node --loader ts-node/esm src/main.ts```
+    - dev mode ```npm run dev```
 1. Script coming soonish to install / start database / set up local .env
 
+# Update
+1. run ```bash update.sh``` to update
+    - requires to have been start with PM2 as above
 
    
