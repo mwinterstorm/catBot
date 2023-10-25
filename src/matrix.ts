@@ -69,10 +69,9 @@ export async function sendMsg(roomId: string, text: string, replyEvent?: any, cu
 
 export async function sendEmote(roomId: string, eventId: string, emote: string) {
     try {
-        console.log({details: {roomId: roomId, eventId: eventId, emote: emote, successful: true }},);
         await client.sendRawEvent(roomId, 'm.reaction', { 'm.relates_to': { event_id: eventId, key: emote, rel_type: 'm.annotation' } })
     } catch (err) {
-        console.log({details: {roomId: roomId, eventId: eventId, emote: emote }},err);
+        console.error({details: {roomId: roomId, eventId: eventId, emote: emote }},err);
     }
 }
 
