@@ -9,16 +9,18 @@ export async function checkActionWords(actions: int.intAction[], message: string
             const trigger = action.triggers[t]
             if (trigger.test(message)) {
                 if (action.modifiers && action.modifiers.length > 0) {
+                    console.log(action.modifiers);
+
                     for (let m = 0; m < action.modifiers.length; m++) {
                         const mod = action.modifiers[m]
                         if (mod.msgContext.msgIncludes && mod.msgContext.msgExcludes) {
                             let modtriggered = false
-                            for (let n = 0; n < mod.msgContext.msgIncludes.length; n ++) {
+                            for (let n = 0; n < mod.msgContext.msgIncludes.length; n++) {
                                 if (mod.msgContext.msgIncludes[n].test(message)) {
                                     modtriggered = true
                                 }
                             }
-                            for (let n = 0; n < mod.msgContext.msgExcludes.length; n ++) {
+                            for (let n = 0; n < mod.msgContext.msgExcludes.length; n++) {
                                 if (mod.msgContext.msgExcludes[n].test(message)) {
                                     modtriggered = false
                                 }
@@ -37,9 +39,41 @@ export async function checkActionWords(actions: int.intAction[], message: string
                                 return response
                             }
                         } else if (mod.msgContext.msgIncludes) {
-
+                            for (let n = 0; n < mod.msgContext.msgIncludes.length; n++) {
+                                if (mod.msgContext.msgIncludes[n].test(message)) {
+                                    const name = action.name
+                                    const response: response = {
+                                        active: true,
+                                        action: name,
+                                        trigger: action,
+                                        modifier: {
+                                            name: mod.modName,
+                                            data: mod.modData || undefined
+                                        }
+                                    }
+                                    return response
+                                }
+                            }
                         } else if (mod.msgContext.msgExcludes) {
-
+                            for (let n = 0; n < mod.msgContext.msgExcludes.length; n++) {
+                                let modtriggered = true
+                                if (mod.msgContext.msgExcludes[n].test(message)) {
+                                    modtriggered = false
+                                }
+                                if (modtriggered) {
+                                    const name = action.name
+                                    const response: response = {
+                                        active: true,
+                                        action: name,
+                                        trigger: action,
+                                        modifier: {
+                                            name: mod.modName,
+                                            data: mod.modData || undefined
+                                        }
+                                    }
+                                    return response
+                                }
+                            }
                         }
                     }
                 }
