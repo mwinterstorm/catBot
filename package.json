@@ -1,6 +1,6 @@
 {
   "name": "catbot",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A personal and lovably naughty matrix assistant",
   "main": "main.ts",
   "scripts": {

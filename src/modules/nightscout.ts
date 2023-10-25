@@ -1,5 +1,38 @@
 import ns from './nightscout/http'
 import { intSugar } from './nightscout/interfaces'
+import * as int from '../interfaces'
+import { checkActionWords } from '../helpers'
+import { sendMsg } from '../matrix'
+
+export async function nightscout (roomId: string, body: any) {
+    const actions: int.intAction[] = [
+        {
+            name: 'getSugar',
+            triggers: [/\bsugar\b/i],
+            modifiers: [
+                {
+                    modName: 'getSugarHistory',
+                    msgContext: {
+                        msgIncludes: [/\bgraph\b/gi, /\bpast\b/gi, /\bhistory\b/gi,]
+                    }
+                }
+            ]
+        },
+        {
+            name: 'diabetes',
+            triggers: [/\bdiabetes\b/i],
+        }
+    ]
+    const active: any = await checkActionWords(actions, body) || false;
+    if (active.action == 'help') {
+        console.log('gather actions for help');
+        console.log(active.actions);
+    } else if (active.active) {
+        // NIGHTSCOUT LOGIC
+        const sugarMsg = await getCurrentSugarMsg()
+        await sendMsg(roomId, sugarMsg.html)
+    }
+}
 
 async function getCurrentSugar () {
     const d = await ns.get('/api/v1/entries/sgv?count=1')
@@ -21,15 +54,14 @@ async function getCurrentSugar () {
 
 async function getCurrentSugarMsg() {
     const sugar = await getCurrentSugar() 
-    const html = "<p>Meow!<br>Sugar is <b>" + sugar.mmoll + "</b><br>It is <em>" + sugar.direction + "</em> (" + sugar.delta + ")<br>Reading is " + sugar.timeAgo + " mins old"   
+    const html = "<p>Sugar is <b>" + sugar.mmoll + "</b><br>It is <em>" + sugar.direction + "</em> (" + sugar.delta + ")<br>Reading is " + sugar.timeAgo + " mins old"   
     const response = {
-        plain: 'meow!' + sugar.time + ' (' + sugar.timeAgo + ') - Sugar is ' + sugar.mmoll + ' and ' + sugar.direction,
+        plain: sugar.time + ' (' + sugar.timeAgo + ') - Sugar is ' + sugar.mmoll + ' and ' + sugar.direction,
         html:  html
     }
     return response
 }
 
 export default {
-    getCurrentSugar,
-    getCurrentSugarMsg,
+    nightscout,
 }
