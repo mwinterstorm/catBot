@@ -39,7 +39,7 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         if (body?.startsWith('!meow') || mentions.includes(catSelf)) {
             // NIGHTSCOUT INTEGRATION
             if (process.env.NIGHTSCOUT) {
-                nightscout(roomId,body)
+                nightscout(roomId, body)
             }
 
             // Universal commands
@@ -68,7 +68,11 @@ export async function sendMsg(roomId: string, text: string, replyEvent?: any, cu
 }
 
 export async function sendEmote(roomId: string, eventId: string, emote: string) {
-    await client.sendRawEvent(roomId, 'm.reaction', { 'm.relates_to': { event_id: eventId, key: emote, rel_type: 'm.annotation' } })
+    try {
+        await client.sendRawEvent(roomId, 'm.reaction', { 'm.relates_to': { event_id: eventId, key: emote, rel_type: 'm.annotation' } })
+    } catch (err) {
+        console.log({details: {roomId: roomId, eventId: eventId, emote: emote }},err);
+    }
 }
 
 async function universalCommands(roomId: string, body: any) {
