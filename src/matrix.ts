@@ -22,7 +22,7 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         const eId = event.event_id
         const mentions = (event.content['m.mentions']?.user_ids) ? event.content['m.mentions'].user_ids : ['none']
 
-        console.log(timeS + ' - ' + sender + ': ' + body);
+        // console.log(timeS + ' - ' + sender + ': ' + body);
 
         // Don't handle unhelpful events (ones that aren't text messages, are redacted, or sent by us)
         if (event['sender'] === catSelf) return;
@@ -89,8 +89,8 @@ async function universalCommands(roomId: string, body: any) {
     const active: any = await checkActionWords(actions, body) || { active: false, action: 'none', actions: [] }
     if (active) {
         if (active.action == 'help') {
-            console.log('gather actions for help');
-            console.log(active.actions);
+            // console.log('gather actions for help');
+            // console.log(active.actions);
         } else if (active.action == 'about') {
             const res = await getAbout()
             await client.sendHtmlNotice(roomId, 'meow! Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)

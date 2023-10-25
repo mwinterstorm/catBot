@@ -25,8 +25,8 @@ export async function nightscout (roomId: string, body: any) {
     ]
     const active: any = await checkActionWords(actions, body) || false;
     if (active.action == 'help') {
-        console.log('gather actions for help');
-        console.log(active.actions);
+        // console.log('gather actions for help');
+        // console.log(active.actions);
     } else if (active.active) {
         // NIGHTSCOUT LOGIC
         const sugarMsg = await getCurrentSugarMsg()
