@@ -25,7 +25,6 @@ pm2 restart catbot
 sleep 1
 
 pm2 reset catbot
-pm2 status
 
 read -p "Load PM2 Dash? [y/N]" v_dash
 if [ $v_dash = "y" ]
