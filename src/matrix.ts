@@ -1,7 +1,15 @@
 import { MatrixClient, SimpleFsStorageProvider, AutojoinRoomsMixin, RustSdkCryptoStorageProvider } from 'matrix-bot-sdk';
 import { catbotReacts } from './modules/catbotReacts';
-import { nightscout } from './modules/nightscout';
 import { checkActionWords, getAbout } from './helpers';
+
+// Conditionally loaded module imports
+let nightscout: Function
+if (process.env.NIGHTSCOUT) {
+    import('./modules/nightscout')
+    .then(module => {
+        nightscout = module.nightscout
+    })
+}
 
 const storage = new SimpleFsStorageProvider("catbot.json");
 
