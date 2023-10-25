@@ -1,6 +1,7 @@
-import { intReactions, intReactTrigger } from "../interfaces";
+import { intReactions, intReactTrigger } from './catbotReacts/interfaces';
 import mongoose from "mongoose";
-import * as emoji from 'node-emoji'
+import * as emoji from 'node-emoji';
+import { sendEmote } from "../matrix";
 
 const reactTriggerSchema = new mongoose.Schema<intReactTrigger>({
     word: { type: [String], required: true },
@@ -9,7 +10,7 @@ const reactTriggerSchema = new mongoose.Schema<intReactTrigger>({
     pluralOk: { type: Boolean, required: true },
     canPossess: { type: Boolean, required: true },
     overrideEmote: { type: String, required: false },
-})
+});
 
 export const reactSchema = new mongoose.Schema<intReactions>({
     reactType: { type: String, required: false },
@@ -26,10 +27,10 @@ export const reactSchema = new mongoose.Schema<intReactions>({
 
 export const reaction = mongoose.model('reaction', reactSchema);
 
-export async function catbotReacts(message: String, eId: String, mentions: String[], catbotId: String) {
-    let arr = message.split(' ')
+export async function catbotReacts(roomId: string, message: string, eId: string, mentions: string[], catbotId: string) {
+    let arr = message.split(' ');
     for (let i = 0; i < arr.length; i++) {
-        const regex = new RegExp(`\\b(${arr[i]})\\b`, 'i')
+        const regex = new RegExp(`\\b(${arr[i]})\\b`, 'i');
         if (await reaction.exists({ 'trigger.word': regex })) {
             const res: intReactions = await reaction.findOne({ 'trigger.word': { $regex: regex } }, { 'reactType': 1, 'trigger.$': 1, 'emote': 1, 'modifiers': 1 }).lean() || { trigger: [], emote: '' }
 
@@ -40,32 +41,30 @@ export async function catbotReacts(message: String, eId: String, mentions: Strin
                         const regTest = new RegExp(res.modifiers[m].regex?.toString() || '', 'gi')
                         if (regTest.test(message.toString())) {
                             const emote = emoji.emojify(res.modifiers[m].overrideEmote?.toString() || '') || '';
-                            const item = (emote != '') ? { emote: emote, eId: eId, react: true } : { emote: '', eId: eId, react: false }                            
-                            return item
+                            await sendEmote(roomId, eId, emote)
                         }
                     }
                 }
+            } else {
+                // OTHERWISE FIND EMOTE
+                const emote = await (
+                    (!res.trigger[0].caseSensitive) ?
+                        emoji.emojify(res.emote.toString()) :
+                        (reaction.findOne({ 'trigger.word': { $regex: new RegExp(`\\b(${arr[i]})\\b`) } }, { 'reactType': 1, 'trigger.$': 1, 'emote': 1 }).lean().then(res => {
+                            if (res && res.emote) {
+                                return emoji.emojify(res.emote.toString())
+                            }
+                        }))) || ''
+                await sendEmote(roomId, eId, emote)
             }
-            
-            // OTHERWISE FIND EMOTE
-            const emote = await (
-                (!res.trigger[0].caseSensitive) ?
-                    emoji.emojify(res.emote.toString()) :
-                    (reaction.findOne({ 'trigger.word': { $regex: new RegExp(`\\b(${arr[i]})\\b`) } }, { 'reactType': 1, 'trigger.$': 1, 'emote': 1 }).lean().then(res => {
-                        if (res && res.emote) {
-                            return emoji.emojify(res.emote.toString())
-                        }
-                    }))) || ''
-            const item = (emote != '') ? { emote: emote, eId: eId, react: true } : { emote: '', eId: eId, react: false }
-            return item
         }
     }
+    
     // React to mention of self
-    if (mentions.includes(catbotId)){
-        const item = { emote: emoji.emojify(':cat:'), eId: eId, react: true }                          
-        return item
+    if (mentions.includes(catbotId)) {
+        await sendEmote(roomId, eId, emoji.emojify(':cat:'))
+        return
     }
     // IF NO REACT
-    const item = { react: false, eId: eId, emote: null, }
-    return item
+    return
 }
