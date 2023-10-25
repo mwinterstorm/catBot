@@ -1,19 +1,5 @@
 [
     {
-        "reactType": "catbot",
-        "trigger": [
-            {
-                "word": [
-                    "catbot"
-                ],
-                "caseSensitive": false,
-                "pluralOk": true,
-                "canPossess": true
-            }
-        ],
-        "emote": ":cat:"
-    },
-    {
         "reactType": "cats",
         "trigger": [
             {
