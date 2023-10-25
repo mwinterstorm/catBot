@@ -32,5 +32,13 @@ then
 echo Loading Dash...
 pm2 dash
 else 
+
+read -p "show logs? [y/N]" v_logs
+if [ $v_logs = "y" ]
+then
+echo Loading logs...
+pm2 logs catbot
+else 
 echo ...done...
+fi
 fi
