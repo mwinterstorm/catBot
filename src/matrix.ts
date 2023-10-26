@@ -1,15 +1,17 @@
 import { MatrixClient, SimpleFsStorageProvider, AutojoinRoomsMixin, RustSdkCryptoStorageProvider } from 'matrix-bot-sdk';
 import { catbotReacts } from './modules/catbotReacts';
-import { checkActionWords, getAbout } from './helpers';
+import { checkActionWords, getAbout, helpConstructor } from './helpers';
 
 // Conditionally loaded module imports
-let nightscout: Function
-if (process.env.NIGHTSCOUT) {
-    import('./modules/nightscout')
-    .then(module => {
-        nightscout = module.nightscout
-    })
-}
+// let nightscout: any
+// if (process.env.NIGHTSCOUT) {
+//     import('./modules/nightscout')
+//     .then(module => {
+//         nightscout = module.nightscout
+//     })
+// }
+// console.log(nightscout);
+
 
 const storage = new SimpleFsStorageProvider("catbot.json");
 
@@ -47,8 +49,10 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         if (body?.startsWith('!meow') || mentions.includes(catSelf)) {
             // NIGHTSCOUT INTEGRATION
             if (process.env.NIGHTSCOUT) {
-                nightscout(roomId, body)
-            }
+                import('./modules/nightscout')
+                .then(ns => {
+                ns.nightscout(roomId, body)
+            })}
 
             // Universal commands
             universalCommands(roomId, body)
@@ -88,17 +92,25 @@ async function universalCommands(roomId: string, body: any) {
         {
             name: 'about',
             triggers: [/\babout\b/i],
+            effect: 'Find out about catBot'
+        },
+        {
+            name: 'help',
+            triggers: [/\bhelp\b/],
+            effect: 'This help message'
         },
         {
             name: 'version',
             triggers: [/\bversion\b/i,],
+            effect: 'Get catBot version number'
         }
     ]
     const active: any = await checkActionWords(actions, body) || { active: false, action: 'none', actions: [] }
     if (active) {
         if (active.action == 'help') {
-            // console.log('gather actions for help');
-            // console.log(active.actions);
+            const moduleName = 'General Functions'
+            const moduleDesc = 'General Built in functions'
+            helpConstructor(roomId, actions,moduleName,moduleDesc)
         } else if (active.action == 'about') {
             const res = await getAbout()
             await client.sendHtmlNotice(roomId, 'meow! Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)
