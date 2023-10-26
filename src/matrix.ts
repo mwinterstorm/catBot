@@ -47,16 +47,15 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
 
         // TRIGGERED INTEGRATIONS
         if (body?.startsWith('!meow') || mentions.includes(catSelf)) {
+            // Universal commands
+            universalCommands(roomId, body)
+
             // NIGHTSCOUT INTEGRATION
             if (process.env.NIGHTSCOUT) {
                 import('./modules/nightscout')
                 .then(ns => {
                 ns.nightscout(roomId, body)
             })}
-
-            // Universal commands
-            universalCommands(roomId, body)
-
         }
 
         // Put in functions that run randomly on messages under here
