@@ -126,9 +126,9 @@ async function universalCommands(roomId: string, body: any) {
         } else if (active.action == 'uptime') {
             const res = lastlaunchtime
             const now = new Date()
-            const hours = ((now.getHours() - res.getHours()) > 9) ? (now.getHours() - res.getHours()) : '0' + (now.getHours() - res.getHours())
-            const mins = ((now.getMinutes() - res.getMinutes()) > 9) ? (now.getMinutes() - res.getMinutes()) : '0' + (now.getMinutes() - res.getMinutes())
-            const secs = ((now.getSeconds() - res.getSeconds()) > 9) ? (now.getSeconds() - res.getSeconds()) : '0' + (now.getSeconds() - res.getSeconds())
+            const hours = ((now.getHours() - res.getHours()) > 9) ? (now.getHours() - res.getHours()) : '0' + (now.getHours() - res.getHours()).toString()
+            const mins = ((now.getMinutes() - res.getMinutes()) > 9) ? (now.getMinutes() - res.getMinutes()) : '0' + (now.getMinutes() - res.getMinutes()).toString()
+            const secs = ((now.getSeconds() - res.getSeconds()) > 9) ? (now.getSeconds() - res.getSeconds()) : '0' + (now.getSeconds() - res.getSeconds()).toString()
             const days = ((now.getDate() - res.getDate()) > 0) ? (now.getDate() - res.getDate()) + ' days ' : ''
             const months = ((now.getMonth() - res.getMonth()) > 0) ? (now.getMonth() - res.getMonth()) + ' months ' : ''
             const years = ((now.getFullYear() - res.getFullYear()) > 0) ? (now.getFullYear() - res.getFullYear()) + ' years ' : ''
