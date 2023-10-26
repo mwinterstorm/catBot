@@ -39,17 +39,18 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         const roomMembers: [] = await client.getJoinedRoomMembers(roomId);
         const numberRoomMembers: number = roomMembers.length;
         const fbody = event['content']['formatted_body'];
-        if (body?.startsWith('!meow') || mentions.includes(catSelf) || numberRoomMembers == 2 || fbody?.includes('https://matrix.to/#/' + catSelf) ) {
-            
-        // Universal commands
+        if (body?.startsWith('!meow') || mentions.includes(catSelf) || numberRoomMembers == 2 || fbody?.includes('https://matrix.to/#/' + catSelf)) {
+
+            // Universal commands
             universalCommands(roomId, body)
 
             // NIGHTSCOUT INTEGRATION
             if (process.env.NIGHTSCOUT) {
                 import('./modules/nightscout')
-                .then(ns => {
-                ns.nightscout(roomId, body)
-            })}
+                    .then(ns => {
+                        ns.nightscout(roomId, body)
+                    })
+            }
         }
 
         // Put in functions that run randomly on messages under here
@@ -76,7 +77,7 @@ export async function sendEmote(roomId: string, eventId: string, emote: string) 
     try {
         await client.sendRawEvent(roomId, 'm.reaction', { 'm.relates_to': { event_id: eventId, key: emote, rel_type: 'm.annotation' } })
     } catch (err) {
-        console.error({details: {roomId: roomId, eventId: eventId, emote: emote }},err);
+        console.error({ details: { roomId: roomId, eventId: eventId, emote: emote } }, err);
     }
 }
 
@@ -103,7 +104,7 @@ async function universalCommands(roomId: string, body: any) {
         if (active.action == 'help') {
             const moduleName = 'General Functions'
             const moduleDesc = 'General Built in functions'
-            helpConstructor(roomId, actions,moduleName,moduleDesc)
+            helpConstructor(roomId, actions, moduleName, moduleDesc)
         } else if (active.action == 'about') {
             const res = await getAbout()
             await client.sendHtmlNotice(roomId, 'meow! Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)
