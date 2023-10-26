@@ -47,9 +47,6 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         const fbody = event['content']['formatted_body'];
         if (body?.startsWith('!meow') || mentions.includes(catSelf) || numberRoomMembers == 2 || fbody?.includes('https://matrix.to/#/' + catSelf)) {
 
-            // Universal commands
-            universalCommands(roomId, body)
-
             // NIGHTSCOUT INTEGRATION
             if (process.env.NIGHTSCOUT) {
                 import('./modules/nightscout')
@@ -58,7 +55,12 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
                     })
             }
 
+            // WEATHER
             wttr(roomId, body)
+
+            // ADMIN COMMANDS
+            universalCommands(roomId, body)
+
         }
 
         // Put in functions that run randomly on messages under here
@@ -122,15 +124,15 @@ async function universalCommands(roomId: string, body: any) {
             const res = await getAbout()
             await sendMsg(roomId, 'Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)
         } else if (active.action == 'uptime') {
-            const res = lastlaunchtime 
+            const res = lastlaunchtime
             const now = new Date()
             const hours = ((now.getHours() - res.getHours()) > 9) ? (now.getHours() - res.getHours()) : '0' + (now.getHours() - res.getHours())
             const mins = ((now.getMinutes() - res.getMinutes()) > 9) ? (now.getMinutes() - res.getMinutes()) : '0' + (now.getMinutes() - res.getMinutes())
             const secs = ((now.getSeconds() - res.getSeconds()) > 9) ? (now.getSeconds() - res.getSeconds()) : '0' + (now.getSeconds() - res.getSeconds())
             const days = ((now.getDate() - res.getDate()) > 0) ? (now.getDate() - res.getDate()) + ' days ' : ''
             const months = ((now.getMonth() - res.getMonth()) > 0) ? (now.getMonth() - res.getMonth()) + ' months ' : ''
-            const years = ((now.getFullYear() - res.getFullYear()) > 0 ) ? (now.getFullYear() - res.getFullYear()) + ' years ' : ''
-            const timeAgo = years + months  + days + hours + ':' + mins + ':' + secs
+            const years = ((now.getFullYear() - res.getFullYear()) > 0) ? (now.getFullYear() - res.getFullYear()) + ' years ' : ''
+            const timeAgo = years + months + days + hours + ':' + mins + ':' + secs
             await sendMsg(roomId, '<br>Running since: <b>' + res.toLocaleString('en-NZ') + '</b> <br> Uptime: <b>' + timeAgo + '</b>')
         } else if (active.action == 'version') {
             const res = await getAbout()
