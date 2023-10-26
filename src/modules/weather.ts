@@ -86,6 +86,8 @@ export async function wttr(roomId: string, body: any) {
                     city = undefined
                 }
                 const res = await getWeather(options, city)
+                console.log(res);
+                
                 await sendMsg(roomId, res.toString())
                 return
             }
@@ -118,7 +120,8 @@ export async function getWeather(options?: { forecast?: boolean, tomorrow?: bool
         const weather: any = await w('/' + city + opt + view,apiVersion)
         return weather.data
     } catch (err) {
-        console.log(err);
+        // console.log(err);
+        return 'Error - not found'
     }
 }
 
