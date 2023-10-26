@@ -28,11 +28,11 @@ export const reactSchema = new mongoose.Schema<intReactions>({
 export const reaction = mongoose.model('reaction', reactSchema);
 
 export async function catbotReacts(roomId: string, message: string, eId: string, mentions: string[], catbotId: string, catbotName: string) {
-    let arr = message.split(' ');
+    let arr = message.replace(/[^\p{L}\s]/gu,"").replace(/\n/gu, ' ').split(' ');
     for (let i = 0; i < arr.length; i++) {
         arr[i] = arr[i].replace(/[^\p{L}\s]/gu,"")
         const regex = new RegExp(`\\b(${arr[i]})\\b`, 'gi');
-        if (await reaction.exists({ 'trigger.word': regex })) {
+        if (arr[i] != '' && await reaction.exists({ 'trigger.word': regex })) {
             const res: intReactions = await reaction.findOne({ 'trigger.word': { $regex: regex } }, { 'reactType': 1, 'trigger.$': 1, 'emote': 1, 'modifiers': 1 }).lean() || { trigger: [], emote: '' }
 
             // CHECK IF BASE REACT MODIFIED BY REGEX
