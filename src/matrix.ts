@@ -1,6 +1,7 @@
 import { MatrixClient, SimpleFsStorageProvider, AutojoinRoomsMixin, RustSdkCryptoStorageProvider } from 'matrix-bot-sdk';
 import { catbotReacts } from './modules/catbotReacts';
 import { checkActionWords, getAbout, helpConstructor } from './helpers';
+import { emojify } from 'node-emoji';
 
 const storage = new SimpleFsStorageProvider("catbot.json");
 
@@ -64,7 +65,7 @@ export async function sendMsg(roomId: string, text: string, replyEvent?: any, cu
     if (customMeow) {
         text = customMeow + ' ' + text
     } else {
-        text = 'meow! ' + text
+        text = emojify(':cat:') + ' meow! ' + text
     }
     if (!replyEvent) {
         client.sendHtmlNotice(roomId, text)
