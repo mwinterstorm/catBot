@@ -12,6 +12,8 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
     client = new MatrixClient(homeserverUrl, accessToken, storage, cryptoProvider);
     AutojoinRoomsMixin.setupOnClient(client);
     const catSelf = await client.getUserId()
+    const catSelfData = await client.getUserProfile(catSelf)
+
     client.on("room.message", processEvents);
     client.start().then(() => console.log("meow! catBot started!"));
 
@@ -30,7 +32,7 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         if (event['content']?.['msgtype'] !== 'm.text') return;
 
         // CATBOT REACTS
-        catbotReacts(roomId, body, eId, mentions, catSelf)
+        catbotReacts(roomId, body, eId, mentions, catSelf, catSelfData.displayname)
 
         // CATBOT RESPONDS
         // const response = await catbotResponds(body, eId)
@@ -64,8 +66,8 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
 
 export async function sendMsg(roomId: string, text: string, replyEvent?: any, customMeow?: string) {
     if (customMeow) {
-        text = customMeow + ' ' + text
-    } else {
+        text = customMeow + text
+    } else if (customMeow === undefined) {
         text = emojify(':cat:') + ' meow! ' + text
     }
     if (!replyEvent) {
