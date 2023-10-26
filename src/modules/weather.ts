@@ -12,7 +12,7 @@ export async function wttr(roomId: string, body: any) {
             modifiers: [{
                 modName: 'todayForecast',
                 msgContext: {
-                    msgIncludes: [/\bforecast\b/gi, /\btoday\b/gi, /\bt\b/gi, /\bf\b/gi],
+                    msgIncludes: [/\bforecast\b/gi, /\btoday\b/gi, /\bff\b/gi],
                     msgExcludes: [/\btomorrow\b/gi, /\btt\b/gi],
                     requiresBothIncludeAndExclude: true
                 },
@@ -21,14 +21,14 @@ export async function wttr(roomId: string, body: any) {
             {
                 modName: 'tomorrowForecast',
                 msgContext: {
-                    msgIncludes: [/\btomorrow\b/gi, /\btt\b/gi, /\bff\b/gi]
+                    msgIncludes: [/\btomorrow\b/gi, /\btt\b/gi, /\bfff\b/gi]
                 },
                 effect: "get Tomorrows's forecast"
             },
             {
                 modName: 'cityLocation',
                 msgContext: {
-                    msgIncludes: [/\bc\b/gi, /\bl\b/gi, /\bcityname\b/gi, /\blatlong\b/gi, /\blocation\b/gi,]
+                    msgIncludes: [/\bcc\b/gi, /\bll\b/gi, /\bcityname\b/gi, /\blatlong\b/gi, /\blocation\b/gi,]
                 },
                 effect: "get weather at location",
                 modData: body
@@ -36,14 +36,14 @@ export async function wttr(roomId: string, body: any) {
             {
                 modName: 'detail',
                 msgContext: {
-                    msgIncludes: [/\bd\b/gi,]
+                    msgIncludes: [/\bdd\b/gi,]
                 },
                 effect: "Show extra detail",
             },
             {
                 modName: 'quickSimple',
                 msgContext: {
-                    msgIncludes: [/\bq\b/gi, /\\bs\b/gi,]
+                    msgIncludes: [/\bqq\b/gi, /\bss\b/gi,]
                 },
                 effect: "Show quick & simple",
             }]
