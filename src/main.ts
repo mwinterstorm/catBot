@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 
 import { matrix } from './matrix'
 import { initialiseDB } from './setup/initialiseDB';
+import { getAbout } from './helpers';
 // import { catbotResponds } from './modules/catbotResponds';
 
 export const lastlaunchtime = new Date()
@@ -45,7 +46,9 @@ if (accessToken != 'invalid_token') {
     app.get('/', async (req: Request, res: Response) => {
         res.json({ 
             meow: 'meow! catbot is a-ok!', 
-            runningSince: lastlaunchtime.toLocaleString('en-NZ') 
+            runningSince: lastlaunchtime.toLocaleString('en-NZ'),
+            version: (await getAbout()).version,
+            author: (await getAbout()).author, 
         });
     });
 
