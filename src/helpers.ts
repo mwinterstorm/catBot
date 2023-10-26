@@ -141,6 +141,15 @@ async function helpMsg(roomId: string, helpItem: int.intHelpItem) {
     help.push(helpItem)
 
     if (received >= wait) {
+        help.sort(function(a, b) {
+            if (a.module < b.module) {
+                return -1
+            }
+            if (a.module > b.module) {
+                return 1
+            }
+            return 0
+        })
         let helpArr = []
         helpArr.push('<body><h2><b>MEOW! CatBot Kitty Helps You!</b></h2><ul>')
         for (let i = 0; i < help.length; i++) {

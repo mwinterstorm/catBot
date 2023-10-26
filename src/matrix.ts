@@ -3,6 +3,7 @@ import { emojify } from 'node-emoji';
 import { catbotReacts } from './modules/catbotReacts';
 import { checkActionWords, getAbout, helpConstructor } from './helpers';
 import { wttr } from './modules/weather';
+import { lastlaunchtime } from './main';
 
 const storage = new SimpleFsStorageProvider("catbot.json");
 
@@ -22,7 +23,7 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         const body = event['content']['body'];
         const eId = event.event_id
         const mentions = (event.content['m.mentions']?.user_ids) ? event.content['m.mentions'].user_ids : ['none']
-        
+
         // Log all messages processed
         // const sender = event.sender
         // const timeS = new Date(event.origin_server_ts).toLocaleString()
@@ -101,6 +102,11 @@ async function universalCommands(roomId: string, body: any) {
             effect: 'This help message'
         },
         {
+            name: 'uptime',
+            triggers: [/\buptime\b/i,],
+            effect: 'Get catBot uptime'
+        },
+        {
             name: 'version',
             triggers: [/\bversion\b/i,],
             effect: 'Get catBot version number'
@@ -109,12 +115,22 @@ async function universalCommands(roomId: string, body: any) {
     const active: any = await checkActionWords(actions, body) || { active: false, action: 'none', actions: [] }
     if (active) {
         if (active.action == 'help') {
-            const moduleName = 'General Functions'
+            const moduleName = 'Admin Functions'
             const moduleDesc = 'General Built in functions'
             helpConstructor(roomId, actions, moduleName, moduleDesc)
         } else if (active.action == 'about') {
             const res = await getAbout()
             await sendMsg(roomId, 'Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)
+        } else if (active.action == 'uptime') {
+            const res = lastlaunchtime
+            const now = new Date()
+            const hours = now.getHours() - res.getHours()
+            const mins = ((now.getMinutes() - res.getMinutes()) > 9) ? (now.getMinutes() - res.getMinutes()) : '0' + (now.getMinutes() - res.getMinutes())
+            const secs = ((now.getSeconds() - res.getSeconds()) > 9) ? (now.getSeconds() - res.getSeconds()) : '0' + +(now.getSeconds() - res.getSeconds())
+            const days = now.getDate() - res.getDate()
+            const timeAgo = days + ' days' + ' ' + hours + ':' + mins + ':' + secs
+
+            await sendMsg(roomId, 'Running since: <b>' + res.toLocaleString('en-NZ') + '</b> | Uptime <b>' + timeAgo + '</b>')
         } else if (active.action == 'version') {
             const res = await getAbout()
             await sendMsg(roomId, '<b>' + res.name + '</b> version is <b>' + res.version + '</b>')

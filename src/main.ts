@@ -8,7 +8,7 @@ import { matrix } from './matrix'
 import { initialiseDB } from './setup/initialiseDB';
 // import { catbotResponds } from './modules/catbotResponds';
 
-const lastlaunchtime = new Date()
+export const lastlaunchtime = new Date()
 
 // Get errors for rejected promises
 process.on('unhandledRejection', (reason, p) => {
