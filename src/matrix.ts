@@ -122,7 +122,7 @@ async function universalCommands(roomId: string, body: any) {
             const res = await getAbout()
             await sendMsg(roomId, 'Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)
         } else if (active.action == 'uptime') {
-            const res = new Date(new Date(lastlaunchtime).setMonth(5) ) 
+            const res = lastlaunchtime 
             const now = new Date()
             const hours = now.getHours() - res.getHours()
             const mins = ((now.getMinutes() - res.getMinutes()) > 9) ? (now.getMinutes() - res.getMinutes()) : '0' + (now.getMinutes() - res.getMinutes())
