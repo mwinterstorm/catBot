@@ -27,8 +27,8 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
 
     async function processEvents(roomId: string, event: any) {
         const body = event['content']['body'];
-        const sender = event.sender
-        const timeS = new Date(event.origin_server_ts).toLocaleString()
+        // const sender = event.sender
+        // const timeS = new Date(event.origin_server_ts).toLocaleString()
         const eId = event.event_id
         const mentions = (event.content['m.mentions']?.user_ids) ? event.content['m.mentions'].user_ids : ['none']
 
@@ -46,7 +46,10 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         // console.log(response);
 
         // TRIGGERED INTEGRATIONS
-        if (body?.startsWith('!meow') || mentions.includes(catSelf)) {
+        const roomMembers: [] = await client.getJoinedRoomMembers(roomId);
+        const numberRoomMembers: number = roomMembers.length        
+        // send commands with either '!meow' or a mention (doesn't work on all devices) or in a room with only bot
+        if (body?.startsWith('!meow') || mentions.includes(catSelf) || numberRoomMembers == 2 ) {
             // Universal commands
             universalCommands(roomId, body)
 
