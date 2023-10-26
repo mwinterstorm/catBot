@@ -109,10 +109,10 @@ async function universalCommands(roomId: string, body: any) {
             helpConstructor(roomId, actions, moduleName, moduleDesc)
         } else if (active.action == 'about') {
             const res = await getAbout()
-            await client.sendHtmlNotice(roomId, 'meow! Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)
+            await sendMsg(roomId, 'Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)
         } else if (active.action == 'version') {
             const res = await getAbout()
-            await client.sendHtmlNotice(roomId, 'meow! <b>' + res.name + '</b> version is <b>' + res.version + '</b>')
+            await sendMsg(roomId, '<b>' + res.name + '</b> version is <b>' + res.version + '</b>')
         }
     }
 
