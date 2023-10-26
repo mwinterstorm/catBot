@@ -2,17 +2,6 @@ import { MatrixClient, SimpleFsStorageProvider, AutojoinRoomsMixin, RustSdkCrypt
 import { catbotReacts } from './modules/catbotReacts';
 import { checkActionWords, getAbout, helpConstructor } from './helpers';
 
-// Conditionally loaded module imports
-// let nightscout: any
-// if (process.env.NIGHTSCOUT) {
-//     import('./modules/nightscout')
-//     .then(module => {
-//         nightscout = module.nightscout
-//     })
-// }
-// console.log(nightscout);
-
-
 const storage = new SimpleFsStorageProvider("catbot.json");
 
 let client: any
@@ -27,12 +16,12 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
 
     async function processEvents(roomId: string, event: any) {
         const body = event['content']['body'];
-        // const sender = event.sender
-        // const timeS = new Date(event.origin_server_ts).toLocaleString()
+        const sender = event.sender
+        const timeS = new Date(event.origin_server_ts).toLocaleString()
         const eId = event.event_id
         const mentions = (event.content['m.mentions']?.user_ids) ? event.content['m.mentions'].user_ids : ['none']
 
-        // console.log(timeS + ' - ' + sender + ': ' + body);
+        console.log(timeS + ' - ' + sender + ': ' + body);
 
         // Don't handle unhelpful events (ones that aren't text messages, are redacted, or sent by us)
         if (event['sender'] === catSelf) return;
@@ -46,11 +35,13 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         // console.log(response);
 
         // TRIGGERED INTEGRATIONS
+        // send commands with either '!meow' or a mention or in a room with only bot (last one needed for android which doesn't seem to include mentions)
         const roomMembers: [] = await client.getJoinedRoomMembers(roomId);
-        const numberRoomMembers: number = roomMembers.length        
-        // send commands with either '!meow' or a mention (doesn't work on all devices) or in a room with only bot
-        if (body?.startsWith('!meow') || mentions.includes(catSelf) || numberRoomMembers == 2 ) {
-            // Universal commands
+        const numberRoomMembers: number = roomMembers.length;
+        const fbody = event['content']['formatted_body'];
+        if (body?.startsWith('!meow') || mentions.includes(catSelf) || numberRoomMembers == 2 || fbody?.includes('https://matrix.to/#/' + catSelf) ) {
+            
+        // Universal commands
             universalCommands(roomId, body)
 
             // NIGHTSCOUT INTEGRATION
