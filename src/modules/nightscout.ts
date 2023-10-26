@@ -26,9 +26,10 @@ export async function nightscout(roomId: string, body: any) {
         const moduleName = 'Nightscout'
         const moduleDesc = 'Integration with Nightscout (https://nightscout.github.io/)'
         helpConstructor(roomId, actions,moduleName,moduleDesc)
-    } else if (active.modifier?.name == 'getSugarHistory') {
-        const msg = await getRecentSugarMsg()        
-        await sendMsg(roomId, msg.html)
+    // } else if (active.modifiers?[0].name == 'getSugarHistory') {
+        // need to loop through all active modifiers
+    //     const msg = await getRecentSugarMsg()        
+    //     await sendMsg(roomId, msg.html, null, '')
     } else if (active.active) {
         const sugarMsg = await getCurrentSugarMsg()
         await sendMsg(roomId, sugarMsg.html)

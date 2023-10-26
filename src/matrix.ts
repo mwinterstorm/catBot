@@ -1,7 +1,8 @@
 import { MatrixClient, SimpleFsStorageProvider, AutojoinRoomsMixin, RustSdkCryptoStorageProvider } from 'matrix-bot-sdk';
+import { emojify } from 'node-emoji';
 import { catbotReacts } from './modules/catbotReacts';
 import { checkActionWords, getAbout, helpConstructor } from './helpers';
-import { emojify } from 'node-emoji';
+import { wttr } from './modules/weather';
 
 const storage = new SimpleFsStorageProvider("catbot.json");
 
@@ -55,6 +56,8 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
                         ns.nightscout(roomId, body)
                     })
             }
+
+            wttr(roomId, body)
         }
 
         // Put in functions that run randomly on messages under here
@@ -101,7 +104,7 @@ async function universalCommands(roomId: string, body: any) {
             name: 'version',
             triggers: [/\bversion\b/i,],
             effect: 'Get catBot version number'
-        }
+        },
     ]
     const active: any = await checkActionWords(actions, body) || { active: false, action: 'none', actions: [] }
     if (active) {

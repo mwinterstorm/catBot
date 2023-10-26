@@ -1,6 +1,4 @@
-
-
-// General
+// Actions
 interface intAction {
     name: string
     triggers: RegExp[]
@@ -12,12 +10,14 @@ interface intActionModifier {
     msgContext: {
         msgIncludes?: RegExp[]
         msgExcludes?: RegExp[]
+        requiresBothIncludeAndExclude?: boolean
     }
     modName: string
     modData?: any,
     effect: string
 }
 
+// Help
 interface intHelpItem {
     module: string
     desc: string
@@ -36,6 +36,7 @@ interface intHelpTriggerModifierItem {
     modEffect: string
 }
 
+//Export
 export {
     intAction,
     intHelpItem,

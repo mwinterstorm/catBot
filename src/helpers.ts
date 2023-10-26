@@ -2,7 +2,6 @@ import fs from 'fs'
 import * as int from './interfaces'
 import { sendMsg } from './matrix'
 import reg from 'regex-to-strings'
-import { unemojify } from 'node-emoji'
 
 export async function checkActionWords(actions: int.intAction[], message: string) {
     const help = /\bhelp\b/gi
@@ -12,47 +11,47 @@ export async function checkActionWords(actions: int.intAction[], message: string
             const trigger = action.triggers[t]
             if (trigger.test(message)) {
                 if (action.modifiers && action.modifiers.length > 0) {
+                    let activeModifiers: intActiveMod[] = []
                     for (let m = 0; m < action.modifiers.length; m++) {
                         const mod = action.modifiers[m]
                         if (mod.msgContext.msgIncludes && mod.msgContext.msgExcludes) {
-                            let modtriggered = false
+                            let modtriggered: boolean = false
+                            let incTrigger: boolean = false
+                            let exTrigger: boolean = true
+                            let modTrigger: string = ''
                             for (let n = 0; n < mod.msgContext.msgIncludes.length; n++) {
                                 if (mod.msgContext.msgIncludes[n].test(message)) {
-                                    modtriggered = true
+                                    incTrigger = true
+                                    modTrigger = reg.expandN(mod.msgContext.msgIncludes[n],1).toString().toLowerCase()
                                 }
                             }
                             for (let n = 0; n < mod.msgContext.msgExcludes.length; n++) {
                                 if (mod.msgContext.msgExcludes[n].test(message)) {
-                                    modtriggered = false
+                                    exTrigger = false
                                 }
                             }
+                            if (mod.msgContext.requiresBothIncludeAndExclude && incTrigger && exTrigger) {
+                                modtriggered = true
+                            } else if (!mod.msgContext.requiresBothIncludeAndExclude && incTrigger) {
+                                modtriggered = true
+                            } else if (!mod.msgContext.requiresBothIncludeAndExclude && exTrigger) { 
+                                modtriggered = true
+                            }
                             if (modtriggered) {
-                                const name = action.name
-                                const response: response = {
-                                    active: true,
-                                    action: name,
-                                    trigger: action,
-                                    modifier: {
+                                const activeMod: intActiveMod = {
                                         name: mod.modName,
-                                        data: mod.modData || undefined
-                                    }
+                                        data: [mod.modData, modTrigger] || undefined,
                                 }
-                                return response
+                                activeModifiers.push(activeMod)
                             }
                         } else if (mod.msgContext.msgIncludes) {
                             for (let n = 0; n < mod.msgContext.msgIncludes.length; n++) {
                                 if (mod.msgContext.msgIncludes[n].test(message)) {
-                                    const name = action.name
-                                    const response: response = {
-                                        active: true,
-                                        action: name,
-                                        trigger: action,
-                                        modifier: {
-                                            name: mod.modName,
-                                            data: mod.modData || undefined
-                                        }
-                                    }
-                                    return response
+                                    const activeMod: intActiveMod = {
+                                        name: mod.modName,
+                                        data: [mod.modData, reg.expandN(mod.msgContext.msgIncludes[n],1).toString().toLowerCase()] || undefined,
+                                }
+                                activeModifiers.push(activeMod)
                                 }
                             }
                         } else if (mod.msgContext.msgExcludes) {
@@ -62,21 +61,23 @@ export async function checkActionWords(actions: int.intAction[], message: string
                                     modtriggered = false
                                 }
                                 if (modtriggered) {
-                                    const name = action.name
-                                    const response: response = {
-                                        active: true,
-                                        action: name,
-                                        trigger: action,
-                                        modifier: {
-                                            name: mod.modName,
-                                            data: mod.modData || undefined
-                                        }
-                                    }
-                                    return response
+                                    const activeMod: intActiveMod = {
+                                        name: mod.modName,
+                                        data: [mod.modData, reg.expandN(mod.msgContext.msgExcludes[n],1).toString().toLowerCase()] || undefined,
+                                }
+                                activeModifiers.push(activeMod)
                                 }
                             }
                         }
                     }
+                    const name = action.name
+                    const response: response = {
+                        active: true,
+                        action: name,
+                        trigger: action,
+                        modifiers: activeModifiers
+                    }
+                    return response
                 }
                 const name = action.name
                 const response: response = {
@@ -124,7 +125,7 @@ export async function getAbout() {
 let received: number
 let help: int.intHelpItem[]
 async function helpMsg(roomId: string, helpItem: int.intHelpItem) {
-    let wait = 1
+    let wait = 2 //increase for each time that this function is called, or add a conditional like below if not guaranteed will be called
     if (process.env.NIGHTSCOUT) {
         wait++
     }
@@ -240,8 +241,10 @@ interface response {
     action: string
     trigger?: int.intAction
     actions?: int.intAction[]
-    modifier?: {
-        name?: string
-        data?: any
-    }
+    modifiers?: intActiveMod[]
+}
+
+interface intActiveMod {
+    name?: string
+    data?: any
 }
