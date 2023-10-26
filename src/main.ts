@@ -19,6 +19,11 @@ try {
     console.error(err)
 }
 
+process.on('unhandledRejection', (reason, p) => {
+    console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+    // application specific logging, throwing an error, or other logic here
+  });
+
 const homeserverUrl = process.env.MATRIX_BASE_URL || 'invalid_homeserver';
 if (homeserverUrl == 'invalid_homeserver') {
     throw new Error('Meow! Please add your matrix homeserver URL to your .env file')
