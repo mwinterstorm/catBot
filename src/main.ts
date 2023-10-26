@@ -8,6 +8,14 @@ import { matrix } from './matrix'
 import { initialiseDB } from './setup/initialiseDB';
 // import { catbotResponds } from './modules/catbotResponds';
 
+const lastlaunchtime = new Date()
+
+// Get errors for rejected promises
+process.on('unhandledRejection', (reason, p) => {
+    console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+    // application specific logging, throwing an error, or other logic here
+  });
+
 // Database storage
 const mdbURL = process.env.DB_URL + ':' + process.env.DB_PORT
 const mdbDatabase = 'catbot'
@@ -18,11 +26,6 @@ try {
 } catch (err) {
     console.error(err)
 }
-
-process.on('unhandledRejection', (reason, p) => {
-    console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-    // application specific logging, throwing an error, or other logic here
-  });
 
 const homeserverUrl = process.env.MATRIX_BASE_URL || 'invalid_homeserver';
 if (homeserverUrl == 'invalid_homeserver') {
@@ -40,7 +43,10 @@ if (accessToken != 'invalid_token') {
     const port = process.env.PORT || 5508;
 
     app.get('/', async (req: Request, res: Response) => {
-        res.json({ meow: 'meow! catbot is a-ok!' });
+        res.json({ 
+            meow: 'meow! catbot is a-ok!', 
+            runningSince: lastlaunchtime.toLocaleString('en-NZ') 
+        });
     });
 
     app.listen(port, () => {
