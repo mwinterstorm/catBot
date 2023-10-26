@@ -133,17 +133,13 @@ async function helpMsg(roomId: string, helpItem: int.intHelpItem) {
     } else {
         received++
     }
-    console.log(wait);
-    console.log(received);
 
-    // add the current helpItem to help
     if (help === undefined) {
         help = []
     }
     help.push(helpItem)
 
     if (received >= wait) {
-        console.log(help);
         let helpArr = []
         helpArr.push('<body><h2><b>MEOW! CatBot Kitty Helps You!</b></h2><ul>')
         for (let i = 0; i < help.length; i++) {
