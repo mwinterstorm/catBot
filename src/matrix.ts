@@ -17,12 +17,13 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
 
     async function processEvents(roomId: string, event: any) {
         const body = event['content']['body'];
-        const sender = event.sender
-        const timeS = new Date(event.origin_server_ts).toLocaleString()
         const eId = event.event_id
         const mentions = (event.content['m.mentions']?.user_ids) ? event.content['m.mentions'].user_ids : ['none']
-
-        console.log(timeS + ' - ' + sender + ': ' + body);
+        
+        // Log all messages processed
+        // const sender = event.sender
+        // const timeS = new Date(event.origin_server_ts).toLocaleString()
+        // console.log(timeS + ' - ' + sender + ': ' + body);
 
         // Don't handle unhelpful events (ones that aren't text messages, are redacted, or sent by us)
         if (event['sender'] === catSelf) return;
