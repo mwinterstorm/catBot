@@ -122,15 +122,17 @@ async function universalCommands(roomId: string, body: any) {
             const res = await getAbout()
             await sendMsg(roomId, 'Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)
         } else if (active.action == 'uptime') {
-            const res = lastlaunchtime
+            const res = new Date(new Date(lastlaunchtime).setMonth(5) ) 
             const now = new Date()
             const hours = now.getHours() - res.getHours()
             const mins = ((now.getMinutes() - res.getMinutes()) > 9) ? (now.getMinutes() - res.getMinutes()) : '0' + (now.getMinutes() - res.getMinutes())
             const secs = ((now.getSeconds() - res.getSeconds()) > 9) ? (now.getSeconds() - res.getSeconds()) : '0' + +(now.getSeconds() - res.getSeconds())
             const days = now.getDate() - res.getDate()
-            const timeAgo = days + ' days' + ' ' + hours + ':' + mins + ':' + secs
+            const months = now.getMonth() - res.getMonth()
+            const years = now.getFullYear() - res.getFullYear()
+            const timeAgo = years + ' years ' + months + ' months ' + days + ' days ' + hours + ':' + mins + ':' + secs
 
-            await sendMsg(roomId, 'Running since: <b>' + res.toLocaleString('en-NZ') + '</b> | Uptime <b>' + timeAgo + '</b>')
+            await sendMsg(roomId, '<br>Running since: <b>' + res.toLocaleString('en-NZ') + '</b> <br> Uptime: <b>' + timeAgo + '</b>')
         } else if (active.action == 'version') {
             const res = await getAbout()
             await sendMsg(roomId, '<b>' + res.name + '</b> version is <b>' + res.version + '</b>')
