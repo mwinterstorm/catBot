@@ -85,9 +85,7 @@ export async function wttr(roomId: string, body: any) {
                 if (city == 'none') {
                     city = undefined
                 }
-                const res = await getWeather(options, city)
-                console.log(res);
-                
+                const res = await getWeather(options, city)                
                 await sendMsg(roomId, res.toString())
                 return
             }
