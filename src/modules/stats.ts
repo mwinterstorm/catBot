@@ -324,7 +324,7 @@ export default async function addStats(type: typeof intAddStatsType[keyof typeof
         await writedb(dbstats)
         runningTotal = 0
     }
-    console.log(runningTotal);
+    // console.log(runningTotal);
 }
 
 export async function getStats() {
