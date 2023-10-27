@@ -337,7 +337,7 @@ export default async function addStats(type: typeof intAddStatsType[keyof typeof
                 regex: /\bGusto/g,
             },
             {
-                kat: 'kats',
+                kat: 'cats',
                 regex: /\b(cat\w?|kitty|kitties|kitten\w?)\b/gi,
             },
         ]
