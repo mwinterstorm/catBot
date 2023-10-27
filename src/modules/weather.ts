@@ -59,6 +59,7 @@ export async function wttr(roomId: string, body: any) {
             const moduleName = 'Weather'
             const moduleDesc = 'Get the weather!'
             helpConstructor(roomId, actions, moduleName, moduleDesc)
+            return
         } else if (active.action == 'weather') {
             let options: any = {
                 forecast: false,
@@ -86,19 +87,20 @@ export async function wttr(roomId: string, body: any) {
                         options.simple = true
                     }
                 }
-                if (city == 'none') {
-                    city = undefined
-                }
-                const res = await getWeather(options, city)                
-                await sendMsg(roomId, res.toString(),null,null,'weather')
-                addStats('msgAction', roomId, 'weather')
-                return
             }
+            if (city == 'none') {
+                city = undefined
+            }
+            const res = await getWeather(options, city)
+            await sendMsg(roomId, res.toString(), null, null, 'weather')
+            addStats('msgAction', roomId, 'weather')
+            return
         }
+        return
     }
 }
 
-export async function getWeather(options?: { forecast?: boolean, tomorrow?: boolean, detail?: boolean, simple?: boolean }, city?: string) {        
+export async function getWeather(options?: { forecast?: boolean, tomorrow?: boolean, detail?: boolean, simple?: boolean }, city?: string) {
     let opt: string = '?Fn'
     let apiVersion = ''
     if (!city) {
@@ -111,19 +113,19 @@ export async function getWeather(options?: { forecast?: boolean, tomorrow?: bool
     if (options?.tomorrow) {
         view = 2
     }
-    if (options?.simple){
+    if (options?.simple) {
         apiVersion = ''
         view = ''
         opt = '?format=4'
     }
-    if (options?.detail){
+    if (options?.detail) {
         apiVersion = 'v2.'
     }
     try {
-        const weather: any = await w('/' + city + opt + view,apiVersion)
+        const weather: any = await w('/' + city + opt + view, apiVersion)
         return weather.data
     } catch (err) {
-        // console.log(err);
+        console.log(err);
         return 'Error - not found'
     }
 }
