@@ -4,9 +4,9 @@ import { catbotReacts } from './modules/catbotReacts';
 import { checkActionWords, getAbout, helpConstructor } from './helpers';
 import { wttr } from './modules/weather';
 import { lastlaunchtime } from './main';
-import addStats, { getStats } from './modules/stats';
+import addStats, { forceSave2db, getStats } from './modules/stats';
 import { intAddStatsModuleType } from './modules/stats/interfaces';
-import { Nullable } from './interfaces';
+import { Nullable, intAction } from './interfaces';
 
 const storage = new SimpleFsStorageProvider("catbot.json");
 
@@ -102,7 +102,7 @@ export async function sendEmote(roomId: string, eventId: string, emote: string, 
 }
 
 async function universalCommands(roomId: string, body: any) {
-    const actions = [
+    const actions: intAction[] = [
         {
             name: 'about',
             triggers: [/\babout\b/i],
@@ -116,7 +116,14 @@ async function universalCommands(roomId: string, body: any) {
         {
             name: 'stats',
             triggers: [/\bstats\b/i,],
-            effect: 'Get catBot stats'
+            effect: 'Get catBot stats',
+            modifiers: [{
+                modName: 'saveToDb',
+                msgContext: {
+                    msgIncludes: [/\bsave\b/gi]
+                },
+                effect: 'force save current stats to db'
+            }]
         },
         {
             name: 'uptime',
@@ -142,8 +149,18 @@ async function universalCommands(roomId: string, body: any) {
             addStats('msgAction', roomId, 'adminFunctions')
         } else if (active.action == 'stats') {
             const res = await getStats()
-            await sendMsg(roomId, '<h4>Here are some<b> catStats!</b></h4><ul><li>I\'ve read <b>' + res.totalProcessedMsgs.toLocaleString('en-NZ') + '</b> messages over <b>' + res.conversationsEvesdropped.toLocaleString('en-NZ') + '</b> conversations I have evesdropped on.</li><li>I\'ve sent <b>' + res.msgsSent.toLocaleString('en-NZ') + ' </b> messages and <b>' + res.emotesSent.toLocaleString('en-NZ') +' </b> emotes.</li><li><b>' + res.weatherReportsSent.toLocaleString('en-NZ') + '</b> times I\'ve told you the weather.</li><li>I\'ve restarted <b>' + res.timesRestarted.toLocaleString('en-NZ') +' </b> times and checked on sugar levels <b>' + res.sugarSent.toLocaleString('en-NZ') + '</b> times.</li><li> You have asked me for kitty help on <b>' + res.timesKittyHelped.toLocaleString('en-NZ') + '</b> occassions.</li></ul>',null,null,'adminFunctions')
-            addStats('msgAction', roomId, 'adminFunctions')
+            if (active.modifiers.length > 0) {
+                for (let i = 0; i < active.modifiers.length; i++) {
+                    if (active.modifiers[i].name == 'saveToDb') {
+                        let forceSave = await forceSave2db()
+                        await sendMsg(roomId,forceSave.msg,null,null,'adminFunctions')
+                        addStats('msgAction', roomId, 'adminFunctions')
+                    }
+                }
+            } else {
+                await sendMsg(roomId, '<h4>Here are some<b> catStats!</b></h4><ul><li>I\'ve read <b>' + res.totalProcessedMsgs.toLocaleString('en-NZ') + '</b> messages over <b>' + res.conversationsEvesdropped.toLocaleString('en-NZ') + '</b> conversations I have evesdropped on.</li><li>I\'ve sent <b>' + res.msgsSent.toLocaleString('en-NZ') + ' </b> messages and <b>' + res.emotesSent.toLocaleString('en-NZ') +' </b> emotes.</li><li><b>' + res.weatherReportsSent.toLocaleString('en-NZ') + '</b> times I\'ve told you the weather.</li><li>I\'ve restarted <b>' + res.timesRestarted.toLocaleString('en-NZ') +' </b> times and checked on sugar levels <b>' + res.sugarSent.toLocaleString('en-NZ') + '</b> times.</li><li> You have asked me for kitty help on <b>' + res.timesKittyHelped.toLocaleString('en-NZ') + '</b> occassions.</li></ul>',null,null,'adminFunctions')
+                addStats('msgAction', roomId, 'adminFunctions')
+            }
         } else if (active.action == 'uptime') {
             const res = lastlaunchtime
             const now = new Date()

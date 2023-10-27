@@ -396,3 +396,11 @@ async function writedb(statsEntry: intStats) {
     console.log('meow! saved stats at ' + now.toLocaleString('en-NZ') + '! I\'ve read ' + statsEntry.totalProcessedMsgs + ' of your messages');
     return result || 'error'
 }
+
+export async function forceSave2db() {
+    const now = new Date()
+    const result = await stats.findOneAndUpdate({ statsSince: dbstats.statsSince }, dbstats, { upsert: true, new: true }).exec()
+    const msg = 'meow! saved stats at ' + now.toLocaleString('en-NZ') + '! I\'ve read ' + dbstats.totalProcessedMsgs + ' of your messages';
+    console.log(msg);
+    return {result: result, msg: msg} || 'error'
+}
