@@ -56,13 +56,11 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
             // NIGHTSCOUT INTEGRATION
             if (process.env.NIGHTSCOUT) {
                 ++typing
-                console.log(typing);
 
                 import('./modules/nightscout')
                     .then(ns => {
                         ns.nightscout(roomId, body).then(() => {
                             --typing
-                            console.log(typing + ' ns');
                             if (typing <= 0) {
                                 client.setTyping(roomId, false)
                             }
@@ -73,10 +71,11 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
 
             // WEATHER
             ++typing
-            console.log(typing);
             wttr(roomId, body).then(() => {
                 --typing
-                client.setTyping(roomId, false)
+                if (typing <= 0) {
+                    client.setTyping(roomId, false)
+                }
             }
             )
 
@@ -85,7 +84,9 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
             console.log(typing);
             universalCommands(roomId, body).then(() => {
                 --typing
-                client.setTyping(roomId, false)
+                if (typing <= 0) {
+                    client.setTyping(roomId, false)
+                }
             })
         }
 
