@@ -1,12 +1,12 @@
 import { Nullable } from "../interfaces";
 import { getRoomMembers } from "../matrix";
-import { intAddStatsActivity, intAddStatsModuleType, intAddStatsType, intStats, intStatsReport } from "./stats/interfaces";
+import { intAddStatsActivity, intAddStatsModuleType, intAddStatsType, intStats, intStatsReport, intKatRegex } from "./stats/interfaces";
 import { stats } from "./stats/schema";
 
 let dbstats: intStats
 let runningTotal: number = 0
 
-export default async function addStats(type: typeof intAddStatsType[keyof typeof intAddStatsType], roomId?: Nullable<string>, module?: typeof intAddStatsModuleType[keyof typeof intAddStatsModuleType], activity?: typeof intAddStatsActivity[keyof typeof intAddStatsActivity]) {
+export default async function addStats(type: typeof intAddStatsType[keyof typeof intAddStatsType], roomId?: Nullable<string>, module?: Nullable<typeof intAddStatsModuleType[keyof typeof intAddStatsModuleType]>, activity?: Nullable<typeof intAddStatsActivity[keyof typeof intAddStatsActivity]>, message?: string) {
     if (type == 'totalProcessedMsgs' && !module) {
         runningTotal++
         if (!dbstats.totalProcessedMsgs) {
@@ -318,6 +318,51 @@ export default async function addStats(type: typeof intAddStatsType[keyof typeof
                 }
             }
         }
+    } else if (type == 'catStats' && message) {
+        const kats: intKatRegex[] = [
+            {
+                kat: 'Reagan',
+                regex: /\b(Reagan|Rae)/g,
+            },
+            {
+                kat: 'Thatcher',
+                regex: /\b(Thatcher|Thatchy|Thatch)/g,
+            },
+            {
+                kat: 'Romeo',
+                regex: /\b(Romeo|Romey)/g,
+            },
+            {
+                kat: 'Gusto',
+                regex: /\bGusto/g,
+            },
+            {
+                kat: 'kats',
+                regex: /\b(cat\w?|kitty|kitties|kitten\w?)\b/gi,
+            },
+        ]
+        const now = new Date()
+        for (let k = 0; k < kats.length; k++) {
+            if (kats[k].regex.test(message)) {
+                const kIx = dbstats.katStats.findIndex(kat => kat.kat === kats[k].kat)
+                if (kIx == -1) {
+                    dbstats.katStats.push({
+                        kat: kats[k].kat,
+                        timesMentioned: 1,
+                        statsSince: now,
+                        lastUpdate: now,
+                    })
+                } else {
+                    const kStat = dbstats.katStats[kIx]
+                    dbstats.katStats[kIx] = {
+                        kat: kStat.kat,
+                        timesMentioned: ++kStat.timesMentioned,
+                        statsSince: kStat.statsSince,
+                        lastUpdate: now,
+                    }
+                }
+            }
+        }
     }
     // write DB every x messages processed
     if (runningTotal >= 210) {
@@ -335,6 +380,7 @@ export async function getStats() {
         rooms: [],
         modules: [],
         activities: [],
+        katStats: [],
         lastUpdate: new Date,
     }
     const statsDBEntry: intStats = await stats.findOne({}) || empty
@@ -368,6 +414,7 @@ export async function initialiseStats() {
             rooms: [],
             modules: [],
             activities: [],
+            katStats: [],
         }
         stats.findOneAndUpdate({}, entry, { upsert: true, new: true }).exec()
         dbstats = entry
@@ -382,6 +429,7 @@ export async function initialiseStats() {
             rooms: statsDBEntry?.rooms || [],
             modules: statsDBEntry?.modules || [],
             activities: statsDBEntry?.activities || [],
+            katStats: [],
         }
         dbstats = item
         console.log("meow! I've done " + statsDBEntry?.totalMsgActions?.toLocaleString('en-NZ') + ' actions and read ' + statsDBEntry?.totalProcessedMsgs.toLocaleString('en-NZ') + ' of your messages');
@@ -402,5 +450,5 @@ export async function forceSave2db() {
     const result = await stats.findOneAndUpdate({ statsSince: dbstats.statsSince }, dbstats, { upsert: true, new: true }).exec()
     const msg = 'meow! saved stats at ' + now.toLocaleString('en-NZ') + '! I\'ve read ' + dbstats.totalProcessedMsgs + ' of your messages';
     console.log(msg);
-    return {result: result, msg: msg} || 'error'
+    return { result: result, msg: msg } || 'error'
 }

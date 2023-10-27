@@ -36,6 +36,7 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         if (event['sender'] === catSelf) return;
         if (event['content']?.['msgtype'] !== 'm.text') return;
         addStats('totalProcessedMsgs', roomId)
+        addStats('catStats',roomId,null,null,body)
 
         // CATBOT REACTS
         catbotReacts(roomId, body, eId, mentions, catSelf, catSelfData.displayname)

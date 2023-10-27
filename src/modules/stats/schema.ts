@@ -1,6 +1,13 @@
 import mongoose from "mongoose";
-import { intStatsActivities, intStats, intStatsRooms } from './interfaces';
+import { intStatsActivities, intStats, intStatsRooms, intKatStats } from './interfaces';
 import { intStatsModules } from "./interfaces";
+
+const statsKatsSchema = new mongoose.Schema<intKatStats>({
+    kat: {type: String, required: true},
+    timesMentioned: {type: Number, required: true},
+    statsSince: {type: Date, required: true},
+    lastUpdate: {type: Date, required: true}
+})
 
 const statsActivitySchema = new mongoose.Schema<intStatsActivities>({
     activityName: {type: String, required: true},
@@ -35,6 +42,7 @@ export const statsSchema = new mongoose.Schema<intStats>({
     rooms: { type: [statsRoomSchema], required: true},
     modules: { type : [statsModuleSchema], required: true},
     activities: { type: [statsActivitySchema], required: true },
+    katStats: { type: [statsKatsSchema], required: true },
     statsSince: { type: Date, required: true },
     lastUpdate: {type: Date, required: true},
 });

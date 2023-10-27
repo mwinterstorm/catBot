@@ -1,3 +1,4 @@
+import { RegexOptions } from "mongoose"
 
 interface intStats {
     statsSince: Date
@@ -6,6 +7,7 @@ interface intStats {
     rooms: intStatsRooms[]
     modules: intStatsModules[]
     activities: intStatsActivities[]
+    katStats: intKatStats[]
     lastUpdate: Date
 }
 
@@ -36,6 +38,13 @@ interface intStatsActivities {
     lastUpdate: Date
 }
 
+interface intKatStats {
+    kat: string
+    timesMentioned: number
+    statsSince: Date
+    lastUpdate: Date
+}
+
 interface intStatsReport {
     totalProcessedMsgs: number
     totalActions: number
@@ -49,10 +58,16 @@ interface intStatsReport {
     timesRestarted: number
 }
 
+interface intKatRegex {
+    kat: string
+    regex: RegExp
+}
+
 const intAddStatsType =  {
     0: 'totalProcessedMsgs', 
     1: 'msgAction', 
-    2: 'totalActivity'
+    2: 'totalActivity',
+    3: 'catStats',
 } as const
 
 const intAddStatsModuleType = {
@@ -73,14 +88,25 @@ const intAddStatsActivity = {
     100: 'restart',
 } as const
 
+const intKats = {
+    0: 'Reagan',
+    1: 'Thatcher',
+    2: 'Romeo',
+    3: 'Gusto',
+    100: 'cat',
+} as const
+
 //Export
 export {
-    intStats,
-    intStatsRooms,
-    intStatsModules,
-    intStatsActivities,
-    intAddStatsType,  
-    intAddStatsModuleType,  
     intAddStatsActivity,
+    intAddStatsModuleType,  
+    intAddStatsType,  
+    intKats,
+    intKatRegex,
+    intKatStats,
+    intStats,
+    intStatsActivities,
+    intStatsModules,
     intStatsReport,
+    intStatsRooms,
 }
