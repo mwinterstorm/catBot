@@ -2,6 +2,7 @@ import { intReactions, intReactTrigger } from './catbotReacts/interfaces';
 import mongoose from "mongoose";
 import * as emoji from 'node-emoji';
 import { sendEmote } from "../matrix";
+import addStats from './stats';
 
 const reactTriggerSchema = new mongoose.Schema<intReactTrigger>({
     word: { type: [String], required: true },
@@ -28,6 +29,7 @@ export const reactSchema = new mongoose.Schema<intReactions>({
 export const reaction = mongoose.model('reaction', reactSchema);
 
 export async function catbotReacts(roomId: string, message: string, eId: string, mentions: string[], catbotId: string, catbotName: string) {
+    addStats('totalProcessedMsgs',roomId,'catbotReacts')
     let arr = message.replace(/[^\p{L}\s]/gu,"").replace(/\n/gu, ' ').split(' ');
     for (let i = 0; i < arr.length; i++) {
         const regex = new RegExp(`\\b(${arr[i]})\\b`, 'gi');
@@ -41,7 +43,8 @@ export async function catbotReacts(roomId: string, message: string, eId: string,
                         const regTest = new RegExp(res.modifiers[m].regex?.toString() || '', 'gi')
                         if (regTest.test(message.toString())) {
                             const emote = emoji.emojify(res.modifiers[m].overrideEmote?.toString() || '') || '';
-                            await sendEmote(roomId, eId, emote)
+                            await sendEmote(roomId, eId, emote,'catbotReacts')
+                            addStats('msgAction',roomId,'catbotReacts')
                         }
                     }
                 }
@@ -55,7 +58,8 @@ export async function catbotReacts(roomId: string, message: string, eId: string,
                                 return emoji.emojify(res.emote.toString())
                             }
                         }))) || ''
-                await sendEmote(roomId, eId, emote)
+                await sendEmote(roomId, eId, emote,'catbotReacts')
+                addStats('msgAction',roomId,'catbotReacts')
             }
         }
     }
@@ -63,7 +67,8 @@ export async function catbotReacts(roomId: string, message: string, eId: string,
     // React to mention of self
     const catBotFind = new RegExp(catbotName, 'gi')
     if (mentions.includes(catbotId) || catBotFind.test(message)) {
-        await sendEmote(roomId, eId, emoji.emojify(':cat:'))
+        await sendEmote(roomId, eId, emoji.emojify(':cat:'),'catbotReacts')
+        addStats('msgAction',roomId,'catbotReacts')
         return
     }
     // IF NO REACT

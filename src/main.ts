@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import { matrix } from './matrix'
 import { initialiseDB } from './setup/initialiseDB';
 import { getAbout } from './helpers';
+import addStats, { initialiseStats } from './modules/stats';
 // import { catbotResponds } from './modules/catbotResponds';
 
 export const lastlaunchtime = new Date()
@@ -55,6 +56,10 @@ if (accessToken != 'invalid_token') {
     app.listen(port, () => {
         console.log(`meow! catbot is listening at http://localhost:${port}`);
     });
+
+    //initialise stats
+    await initialiseStats()
+    addStats('totalActivity',null,'kittyServer','restart')
 } else {
     const auth = new MatrixAuth(homeserverUrl);
     const botUser = process.env.BOT_USER || 'invalid_user';

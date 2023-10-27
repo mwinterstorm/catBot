@@ -2,6 +2,7 @@ import fs from 'fs'
 import * as int from './interfaces'
 import { sendMsg } from './matrix'
 import reg from 'regex-to-strings'
+import addStats from './modules/stats'
 
 export async function checkActionWords(actions: int.intAction[], message: string) {
     const help = /\bhelp\b/gi
@@ -176,14 +177,17 @@ async function helpMsg(roomId: string, helpItem: int.intHelpItem) {
         helpArr.push('</ul></body>')
         const helpHtml = helpArr.join('')
         // construct message for matrix
-        sendMsg(roomId, helpHtml,null,'<head><meta name="viewport" content="width=device-width></head>"')
+        sendMsg(roomId, helpHtml,null,'<head><meta name="viewport" content="width=device-width></head>"','help')
         received = 0
         help = []
+        addStats('msgAction', roomId, 'help')
+        addStats('totalActivity',roomId,'adminFunctions','kittyHelped')
     }
     return
 }
 
 export async function helpConstructor(roomId: string, actions: int.intAction[], moduleName: string, moduleDesc: string ) {
+    addStats('totalProcessedMsgs', roomId, 'help')
     let help: int.intHelpItem = {module: moduleName, desc: moduleDesc}
     for (let i = 0; i < actions.length; i++) {
         let triggerWords = []

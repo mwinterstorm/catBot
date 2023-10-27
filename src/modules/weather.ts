@@ -2,8 +2,10 @@ import { wttr as w } from "./weather/http";
 import { intAction } from '../interfaces'
 import { checkActionWords, helpConstructor } from "../helpers";
 import { sendMsg } from "../matrix";
+import addStats from "./stats";
 
 export async function wttr(roomId: string, body: any) {
+    addStats('totalProcessedMsgs', roomId, 'weather')
     const actions: intAction[] = [
         {
             name: 'weather',
@@ -86,7 +88,8 @@ export async function wttr(roomId: string, body: any) {
                     city = undefined
                 }
                 const res = await getWeather(options, city)                
-                await sendMsg(roomId, res.toString())
+                await sendMsg(roomId, res.toString(),null,null,'weather')
+                addStats('msgAction', roomId, 'weather')
                 return
             }
         }

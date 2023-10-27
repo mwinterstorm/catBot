@@ -2,8 +2,10 @@ import * as int from '../interfaces'
 import { checkActionWords, helpConstructor } from '../helpers'
 import { sendMsg } from '../matrix'
 import { getCurrentSugarMsg, getRecentSugarMsg } from './nightscout/getFromNightscout'
+import addStats from './stats'
 
 export async function nightscout(roomId: string, body: any) {
+    addStats('totalProcessedMsgs',roomId,'nightscout')
     const actions: int.intAction[] = [
         {
             name: 'getSugar',
@@ -32,7 +34,8 @@ export async function nightscout(roomId: string, body: any) {
     //     await sendMsg(roomId, msg.html, null, '')
     } else if (active.active) {
         const sugarMsg = await getCurrentSugarMsg()
-        await sendMsg(roomId, sugarMsg.html)
+        await sendMsg(roomId, sugarMsg.html,null,null,'nightscout')
+        addStats('msgAction', roomId, 'nightscout')
     }
     return
 }

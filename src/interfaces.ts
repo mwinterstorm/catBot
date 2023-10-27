@@ -36,11 +36,13 @@ interface intHelpTriggerModifierItem {
     modEffect: string
 }
 
+type Nullable<T> = T | null
+
 //Export
 export {
     intAction,
     intHelpItem,
     intHelpTriggerItem,
     intHelpTriggerModifierItem,
-    
+    Nullable,
 }

@@ -4,6 +4,9 @@ import { catbotReacts } from './modules/catbotReacts';
 import { checkActionWords, getAbout, helpConstructor } from './helpers';
 import { wttr } from './modules/weather';
 import { lastlaunchtime } from './main';
+import addStats from './modules/stats';
+import { intAddStatsModuleType } from './modules/stats/interfaces';
+import { Nullable } from './interfaces';
 
 const storage = new SimpleFsStorageProvider("catbot.json");
 
@@ -23,15 +26,16 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         const body = event['content']['body'];
         const eId = event.event_id
         const mentions = (event.content['m.mentions']?.user_ids) ? event.content['m.mentions'].user_ids : ['none']
-
+        
         // Log all messages processed
         // const sender = event.sender
         // const timeS = new Date(event.origin_server_ts).toLocaleString()
         // console.log(timeS + ' - ' + sender + ': ' + body);
-
+        
         // Don't handle unhelpful events (ones that aren't text messages, are redacted, or sent by us)
         if (event['sender'] === catSelf) return;
         if (event['content']?.['msgtype'] !== 'm.text') return;
+        addStats('totalProcessedMsgs', roomId)
 
         // CATBOT REACTS
         catbotReacts(roomId, body, eId, mentions, catSelf, catSelfData.displayname)
@@ -64,28 +68,33 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
         }
 
         // Put in functions that run randomly on messages under here
+        addStats('totalProcessedMsgs',roomId,'randomFunctions')
         if (Math.random() <= 0.001) {
             await client.replyNotice(roomId, event, 'Meow! It\'s me CatBot!', 'Meow! It\'s me CatBot! 🐱🤖');
+            addStats('msgAction',roomId,'randomFunctions')
         }
     }
 }
 
-export async function sendMsg(roomId: string, text: string, replyEvent?: any, customMeow?: string) {
+export async function sendMsg(roomId: string, text: string, replyEvent?: any, customMeow?: Nullable<string>, module?: typeof intAddStatsModuleType[keyof typeof intAddStatsModuleType]) {
     if (customMeow) {
         text = customMeow + text
-    } else if (customMeow === undefined) {
+    } else if (customMeow === null || customMeow === undefined) {
         text = emojify(':cat:') + ' meow! ' + text
     }
     if (!replyEvent) {
         client.sendHtmlNotice(roomId, text)
+        addStats('totalActivity',roomId,module,'sendMsg')
     } else {
         client.replyHtmlNotice(roomId, replyEvent, text.replace(/<[^>]+>/g, ''), text)
+        addStats('totalActivity',roomId,module,'sendReply')
     }
 }
 
-export async function sendEmote(roomId: string, eventId: string, emote: string) {
+export async function sendEmote(roomId: string, eventId: string, emote: string, module: typeof intAddStatsModuleType[keyof typeof intAddStatsModuleType]) {
     try {
         await client.sendRawEvent(roomId, 'm.reaction', { 'm.relates_to': { event_id: eventId, key: emote, rel_type: 'm.annotation' } })
+        addStats('totalActivity',roomId,module,'sendEmote')
     } catch (err) {
         console.error({ details: { roomId: roomId, eventId: eventId, emote: emote } }, err);
     }
@@ -116,34 +125,45 @@ async function universalCommands(roomId: string, body: any) {
     ]
     const active: any = await checkActionWords(actions, body) || { active: false, action: 'none', actions: [] }
     if (active) {
+        addStats('totalProcessedMsgs', roomId, 'adminFunctions')
         if (active.action == 'help') {
             const moduleName = 'Admin Functions'
             const moduleDesc = 'General Built in functions'
             helpConstructor(roomId, actions, moduleName, moduleDesc)
         } else if (active.action == 'about') {
             const res = await getAbout()
-            await sendMsg(roomId, 'Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license)
+            await sendMsg(roomId, 'Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license,null,null,'adminFunctions')
+            addStats('msgAction', roomId, 'adminFunctions')
         } else if (active.action == 'uptime') {
             const res = lastlaunchtime
             const now = new Date()
-            const hours = ((now.getHours() - res.getHours()) > 9) ? (now.getHours() - res.getHours()) : '0' + (now.getHours() - res.getHours()).toString()
-            const mins = ((now.getMinutes() - res.getMinutes()) > 9) ? (now.getMinutes() - res.getMinutes()) : '0' + (now.getMinutes() - res.getMinutes()).toString()
-            const secs = ((now.getSeconds() - res.getSeconds()) > 9) ? (now.getSeconds() - res.getSeconds()) : '0' + (now.getSeconds() - res.getSeconds()).toString()
-            const days = ((now.getDate() - res.getDate()) > 0) ? (now.getDate() - res.getDate()) + ' days ' : ''
-            const months = ((now.getMonth() - res.getMonth()) > 0) ? (now.getMonth() - res.getMonth()) + ' months ' : ''
-            const years = ((now.getFullYear() - res.getFullYear()) > 0) ? (now.getFullYear() - res.getFullYear()) + ' years ' : ''
+            const hours = ((now.getHours() - res.getHours()) > 9) ? Math.abs(now.getHours() - res.getHours()) : '0' + Math.abs(now.getHours() - res.getHours()).toString()
+            const mins = ((now.getMinutes() - res.getMinutes()) > 9) ? Math.abs(now.getMinutes() - res.getMinutes()) : '0' + Math.abs(now.getMinutes() - res.getMinutes()).toString()
+            const secs = ((now.getSeconds() - res.getSeconds()) > 9) ? Math.abs(now.getSeconds() - res.getSeconds()) : '0' + Math.abs(now.getSeconds() - res.getSeconds()).toString()
+            const days = ((now.getDate() - res.getDate()) > 0) ? Math.abs(now.getDate() - res.getDate()) + ' days ' : ''
+            const months = ((now.getMonth() - res.getMonth()) > 0) ? Math.abs(now.getMonth() - res.getMonth()) + ' months ' : ''
+            const years = ((now.getFullYear() - res.getFullYear()) > 0) ? Math.abs(now.getFullYear() - res.getFullYear()) + ' years ' : ''
             const timeAgo = years + months + days + hours + ':' + mins + ':' + secs
-            await sendMsg(roomId, '<br>Running since: <b>' + res.toLocaleString('en-NZ') + '</b> <br> Uptime: <b>' + timeAgo + '</b>')
+            await sendMsg(roomId, '<br>Running since: <b>' + res.toLocaleString('en-NZ') + '</b> <br> Uptime: <b>' + timeAgo + '</b>',null,null,'adminFunctions')
+            addStats('msgAction', roomId, 'adminFunctions')
         } else if (active.action == 'version') {
             const res = await getAbout()
-            await sendMsg(roomId, '<b>' + res.name + '</b> version is <b>' + res.version + '</b>')
+            await sendMsg(roomId, '<b>' + res.name + '</b> version is <b>' + res.version + '</b>',null,null,'adminFunctions')
+            addStats('msgAction', roomId, 'adminFunctions')
         }
     }
 
 }
 
+export async function getRoomMembers(roomId: string) {
+    const members = await client.getJoinedRoomMembers(roomId);
+    const count = members.length
+    return { members: members, count: count}
+}
+
 export default {
     matrix,
     sendEmote,
-    sendMsg
+    sendMsg,
+    getRoomMembers,
 }
