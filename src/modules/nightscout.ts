@@ -5,7 +5,6 @@ import { getCurrentSugarMsg, getRecentSugarMsg } from './nightscout/getFromNight
 import addStats from './stats'
 
 export async function nightscout(roomId: string, body: any) {
-    addStats('totalProcessedMsgs',roomId,'nightscout')
     const actions: int.intAction[] = [
         {
             name: 'getSugar',
@@ -24,6 +23,9 @@ export async function nightscout(roomId: string, body: any) {
 
     ]
     const active = await checkActionWords(actions, body) || false;    
+    if (active.active == true) {
+        addStats('totalProcessedMsgs',roomId,'nightscout')
+    }
     if (active.action == 'help') {
         const moduleName = 'Nightscout'
         const moduleDesc = 'Integration with Nightscout (https://nightscout.github.io/)'

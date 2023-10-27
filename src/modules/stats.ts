@@ -1,6 +1,6 @@
 import { Nullable } from "../interfaces";
 import { getRoomMembers } from "../matrix";
-import { intAddStatsActivity, intAddStatsModuleType, intAddStatsType, intStats } from "./stats/interfaces";
+import { intAddStatsActivity, intAddStatsModuleType, intAddStatsType, intStats, intStatsReport } from "./stats/interfaces";
 import { stats } from "./stats/schema";
 
 let dbstats: intStats
@@ -325,6 +325,34 @@ export default async function addStats(type: typeof intAddStatsType[keyof typeof
         runningTotal = 0
     }
     console.log(runningTotal);
+}
+
+export async function getStats() {
+    let empty = {
+        statsSince: new Date(),
+        totalProcessedMsgs: 0,
+        totalMsgActions: 0,
+        rooms: [],
+        modules: [],
+        activities: [],
+        lastUpdate: new Date,
+    }
+    const statsDBEntry: intStats = await stats.findOne({}) || empty
+    // console.log(statsDBEntry);
+    const report: intStatsReport = {
+        totalProcessedMsgs: statsDBEntry.totalProcessedMsgs,
+        totalActions: statsDBEntry.totalMsgActions,
+        emotesSent: statsDBEntry.activities[statsDBEntry.activities.findIndex(x => x.activityName === 'sendEmote')].totalActivity,
+        msgsSent: statsDBEntry.activities[statsDBEntry.activities.findIndex(x => x.activityName === 'sendMsg')].totalActivity,
+        // repliesSent: statsDBEntry.activities[statsDBEntry.activities.findIndex(x => x.activityName === 'sendReply')].totalActivity,
+        weatherReportsSent: statsDBEntry.modules[statsDBEntry.modules.findIndex(x => x.moduleName === 'weather')].totalMsgActions,
+        sugarSent: statsDBEntry.modules[statsDBEntry.modules.findIndex(x => x.moduleName === 'nightscout')].totalMsgActions,
+        conversationsEvesdropped: statsDBEntry.rooms.length,
+        timesKittyHelped: statsDBEntry.activities[statsDBEntry.activities.findIndex(x => x.activityName === 'kittyHelped')].totalActivity,
+        timesRestarted: statsDBEntry.activities[statsDBEntry.activities.findIndex(x => x.activityName === 'restart')].totalActivity,
+    }
+    return report
+
 }
 
 export async function initialiseStats() {

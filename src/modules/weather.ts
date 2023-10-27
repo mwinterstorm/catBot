@@ -5,7 +5,6 @@ import { sendMsg } from "../matrix";
 import addStats from "./stats";
 
 export async function wttr(roomId: string, body: any) {
-    addStats('totalProcessedMsgs', roomId, 'weather')
     const actions: intAction[] = [
         {
             name: 'weather',
@@ -53,6 +52,9 @@ export async function wttr(roomId: string, body: any) {
     ]
     const active: any = await checkActionWords(actions, body) || { active: false, action: 'none', actions: [] }
     if (active) {
+        if (active.active == true) {
+            addStats('totalProcessedMsgs', roomId, 'weather')
+        }
         if (active.action == 'help') {
             const moduleName = 'Weather'
             const moduleDesc = 'Get the weather!'

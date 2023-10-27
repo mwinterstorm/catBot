@@ -2,7 +2,7 @@
 interface intStats {
     statsSince: Date
     totalProcessedMsgs: number
-    totalMsgActions?: number
+    totalMsgActions: number
     rooms: intStatsRooms[]
     modules: intStatsModules[]
     activities: intStatsActivities[]
@@ -34,6 +34,19 @@ interface intStatsActivities {
     totalActivity: number
     statsSince: Date
     lastUpdate: Date
+}
+
+interface intStatsReport {
+    totalProcessedMsgs: number
+    totalActions: number
+    emotesSent: number
+    msgsSent: number
+    // repliesSent: number
+    weatherReportsSent: number
+    sugarSent: number
+    conversationsEvesdropped: number
+    timesKittyHelped: number
+    timesRestarted: number
 }
 
 const intAddStatsType =  {
@@ -69,4 +82,5 @@ export {
     intAddStatsType,  
     intAddStatsModuleType,  
     intAddStatsActivity,
+    intStatsReport,
 }

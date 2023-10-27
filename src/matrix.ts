@@ -4,7 +4,7 @@ import { catbotReacts } from './modules/catbotReacts';
 import { checkActionWords, getAbout, helpConstructor } from './helpers';
 import { wttr } from './modules/weather';
 import { lastlaunchtime } from './main';
-import addStats from './modules/stats';
+import addStats, { getStats } from './modules/stats';
 import { intAddStatsModuleType } from './modules/stats/interfaces';
 import { Nullable } from './interfaces';
 
@@ -64,14 +64,15 @@ export async function matrix(homeserverUrl: string, accessToken: string) {
 
             // ADMIN COMMANDS
             universalCommands(roomId, body)
-
         }
 
         // Put in functions that run randomly on messages under here
-        addStats('totalProcessedMsgs',roomId,'randomFunctions')
-        if (Math.random() <= 0.001) {
-            await client.replyNotice(roomId, event, 'Meow! It\'s me CatBot!', 'Meow! It\'s me CatBot! 🐱🤖');
-            addStats('msgAction',roomId,'randomFunctions')
+        if (Math.random() <= 0.01) {
+            addStats('totalProcessedMsgs',roomId,'randomFunctions')
+            if (Math.random() <= 0.01) {
+                await client.replyNotice(roomId, event, 'Meow! It\'s me CatBot!', 'Meow! It\'s me CatBot! 🐱🤖');
+                addStats('msgAction',roomId,'randomFunctions')
+            }
         }
     }
 }
@@ -113,6 +114,11 @@ async function universalCommands(roomId: string, body: any) {
             effect: 'This help message'
         },
         {
+            name: 'stats',
+            triggers: [/\bstats\b/i,],
+            effect: 'Get catBot stats'
+        },
+        {
             name: 'uptime',
             triggers: [/\buptime\b/i,],
             effect: 'Get catBot uptime'
@@ -134,6 +140,10 @@ async function universalCommands(roomId: string, body: any) {
             const res = await getAbout()
             await sendMsg(roomId, 'Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license,null,null,'adminFunctions')
             addStats('msgAction', roomId, 'adminFunctions')
+        } else if (active.action == 'stats') {
+            const res = await getStats()
+            await sendMsg(roomId, '<h4>Here are some<b> catStats!</b></h4><ul><li>I\'ve read <b>' + res.totalProcessedMsgs + '</b> message over <b>' + res.conversationsEvesdropped + '</b> conversations I have evesdropped on.</li><li>I\'ve sent <b>' + res.msgsSent + ' </b> messages and <b>' + res.emotesSent +' </b> emotes.</li><li><b>' + res.weatherReportsSent + '</b> times I\'ve told you the weather.</li><li>I\'ve restarted <b>' + res.timesRestarted +' </b> times and checked on sugar levels <b>' + res.sugarSent + '</b> times.</li><li> You have asked me for kitty help on <b>' + res.timesKittyHelped + '</b> occassions.</li></ul>',null,null,'adminFunctions')
+            addStats('msgAction', roomId, 'adminFunctions')
         } else if (active.action == 'uptime') {
             const res = lastlaunchtime
             const now = new Date()
@@ -152,7 +162,6 @@ async function universalCommands(roomId: string, body: any) {
             addStats('msgAction', roomId, 'adminFunctions')
         }
     }
-
 }
 
 export async function getRoomMembers(roomId: string) {

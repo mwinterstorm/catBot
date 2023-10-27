@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 import { matrix } from './matrix'
 import { initialiseDB } from './setup/initialiseDB';
 import { getAbout } from './helpers';
-import addStats, { initialiseStats } from './modules/stats';
+import addStats, { getStats, initialiseStats } from './modules/stats';
 // import { catbotResponds } from './modules/catbotResponds';
 
 export const lastlaunchtime = new Date()
@@ -50,6 +50,7 @@ if (accessToken != 'invalid_token') {
             runningSince: lastlaunchtime.toLocaleString('en-NZ'),
             version: (await getAbout()).version,
             author: (await getAbout()).author, 
+            stats: (await getStats())
         });
     });
 
