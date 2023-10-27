@@ -1,6 +1,6 @@
 import { Nullable } from "../interfaces";
 import { getRoomMembers } from "../matrix";
-import { intAddStatsActivity, intAddStatsModuleType, intAddStatsType, intStats, intStatsReport, intKatRegex } from "./stats/interfaces";
+import { intAddStatsActivity, intAddStatsModuleType, intAddStatsType, intStats, intStatsReport, intKatRegex, intStatsReportCatStats } from "./stats/interfaces";
 import { stats } from "./stats/schema";
 
 let dbstats: intStats
@@ -385,6 +385,14 @@ export async function getStats() {
     }
     const statsDBEntry: intStats = await stats.findOne({}) || empty
     // console.log(statsDBEntry);
+    const catStats = []
+    for (let k = 0; k < statsDBEntry.katStats.length; k++) {
+        const catItem: intStatsReportCatStats = {
+            cat: statsDBEntry.katStats[k].kat,
+            timesMentioned: statsDBEntry.katStats[k].timesMentioned,            
+        }
+        catStats.push(catItem)
+    }
     const report: intStatsReport = {
         totalProcessedMsgs: statsDBEntry.totalProcessedMsgs,
         totalActions: statsDBEntry.totalMsgActions,
@@ -396,6 +404,7 @@ export async function getStats() {
         conversationsEvesdropped: statsDBEntry.rooms.length,
         timesKittyHelped: statsDBEntry.activities[statsDBEntry.activities.findIndex(x => x.activityName === 'kittyHelped')].totalActivity,
         timesRestarted: statsDBEntry.activities[statsDBEntry.activities.findIndex(x => x.activityName === 'restart')].totalActivity,
+        catStats: catStats,
     }
     return report
 

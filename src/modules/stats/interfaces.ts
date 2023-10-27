@@ -45,6 +45,11 @@ interface intKatStats {
     lastUpdate: Date
 }
 
+interface intKatRegex {
+    kat: string
+    regex: RegExp
+}
+
 interface intStatsReport {
     totalProcessedMsgs: number
     totalActions: number
@@ -56,11 +61,12 @@ interface intStatsReport {
     conversationsEvesdropped: number
     timesKittyHelped: number
     timesRestarted: number
+    catStats: intStatsReportCatStats[]
 }
 
-interface intKatRegex {
-    kat: string
-    regex: RegExp
+interface intStatsReportCatStats {
+    cat: string
+    timesMentioned: number
 }
 
 const intAddStatsType =  {
@@ -108,5 +114,6 @@ export {
     intStatsActivities,
     intStatsModules,
     intStatsReport,
+    intStatsReportCatStats,
     intStatsRooms,
 }
