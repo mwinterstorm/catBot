@@ -147,12 +147,12 @@ async function universalCommands(roomId: string, body: any) {
         } else if (active.action == 'uptime') {
             const res = lastlaunchtime
             const now = new Date()
-            const hours = ((now.getHours() - res.getHours()) > 9) ? Math.abs(now.getHours() - res.getHours()) : '0' + Math.abs(now.getHours() - res.getHours()).toString()
-            const mins = ((now.getMinutes() - res.getMinutes()) > 9) ? Math.abs(now.getMinutes() - res.getMinutes()) : '0' + Math.abs(now.getMinutes() - res.getMinutes()).toString()
-            const secs = ((now.getSeconds() - res.getSeconds()) > 9) ? Math.abs(now.getSeconds() - res.getSeconds()) : '0' + Math.abs(now.getSeconds() - res.getSeconds()).toString()
-            const days = ((now.getDate() - res.getDate()) > 0) ? Math.abs(now.getDate() - res.getDate()) + ' days ' : ''
-            const months = ((now.getMonth() - res.getMonth()) > 0) ? Math.abs(now.getMonth() - res.getMonth()) + ' months ' : ''
-            const years = ((now.getFullYear() - res.getFullYear()) > 0) ? Math.abs(now.getFullYear() - res.getFullYear()) + ' years ' : ''
+            const hours = (Math.abs(now.getHours() - res.getHours()) > 9) ? Math.abs(now.getHours() - res.getHours()) : '0' + Math.abs(now.getHours() - res.getHours()).toString()
+            const mins = (Math.abs(now.getMinutes() - res.getMinutes()) > 9) ? Math.abs(now.getMinutes() - res.getMinutes()) : '0' + Math.abs(now.getMinutes() - res.getMinutes()).toString()
+            const secs = (Math.abs(now.getSeconds() - res.getSeconds()) > 9) ? Math.abs(now.getSeconds() - res.getSeconds()) : '0' + Math.abs(now.getSeconds() - res.getSeconds()).toString()
+            const days = (Math.abs(now.getDate() - res.getDate()) > 0) ? Math.abs(now.getDate() - res.getDate()) + ' days ' : ''
+            const months = (Math.abs(now.getMonth() - res.getMonth()) > 0) ? Math.abs(now.getMonth() - res.getMonth()) + ' months ' : ''
+            const years = (Math.abs(now.getFullYear() - res.getFullYear()) > 0) ? Math.abs(now.getFullYear() - res.getFullYear()) + ' years ' : ''
             const timeAgo = years + months + days + hours + ':' + mins + ':' + secs
             await sendMsg(roomId, '<br>Running since: <b>' + res.toLocaleString('en-NZ') + '</b> <br> Uptime: <b>' + timeAgo + '</b>',null,null,'adminFunctions')
             addStats('msgAction', roomId, 'adminFunctions')
