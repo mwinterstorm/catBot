@@ -1,6 +1,6 @@
 import axios from "axios";
 
-let vt: 'v2.' | 'v2d.' | 'v2n.' | 'v3.' | undefined
+// let versionType: 'v2.' | 'v2d.' | 'v2n.' | 'v3.' | undefined
 
 export async function wttr(url:string, version?: any ) {
   let baseURL = 'https://' + version + 'wttr.in'
