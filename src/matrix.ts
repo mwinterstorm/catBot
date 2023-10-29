@@ -129,18 +129,25 @@ async function universalCommands(roomId: string, body: any) {
         {
             name: 'about',
             triggers: [/\babout\b/gi],
-            effect: 'Find out about catBot'
+            effect: 'Find out about catBot',
+            modifiers: [{
+                modName: 'rooms',
+                msgContext: {
+                    msgIncludes: [/\bmemberships\b/gi, /\bmember\b/gi, /\brooms\b/gi,]
+                },
+                effect: 'list what rooms I am a member of'
+            }]
         },
         {
             name: 'help',
             triggers: [/\bhelp\b/gi],
             effect: 'This help message'
         },
-        {
-            name: 'memberships',
-            triggers: [/\bmemberships\b/gi, /\bmember\b/gi, /\brooms\b/gi,],
-            effect: 'This help message'
-        },
+        // {
+        //     name: 'memberships',
+        //     triggers: [/\bmemberships\b/gi, /\bmember\b/gi, /\brooms\b/gi,],
+        //     effect: 'This help message'
+        // },
         {
             name: 'stats',
             triggers: [/\bstats\b/gi,],
@@ -172,23 +179,42 @@ async function universalCommands(roomId: string, body: any) {
             const moduleDesc = 'General Built in functions'
             helpConstructor(roomId, actions, moduleName, moduleDesc)
         } else if (active.action == 'about') {
-            const res = await getAbout()
-            await sendMsg(roomId, 'Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license, null, null, 'adminFunctions')
-            addStats('msgAction', roomId, 'adminFunctions')
-        } else if (active.action == 'memberships') {
-            const res = await client.getJoinedRooms()
-            let rooms: any = []
-            for (let p = 0; p < res.length; p++) {
-                let a = await client.getPublishedAlias(res[p])
-                if (a) {
-                    rooms.push(a)
+            if (active.modifiers.length == 0) {
+                const res = await getAbout()
+                await sendMsg(roomId, 'Let me tell you about <b>' + res.name + '</b>! <br>' + res.description + ' by <b>' + res.author + '</b><br> Version is <b>' + res.version + '</b><br>Licensed under ' + res.license, null, null, 'adminFunctions')
+                addStats('msgAction', roomId, 'adminFunctions')
+            } else if (active.modifiers.length > 0) {
+                for (let i = 0; i < active.modifiers.length; i++) {
+                    if (active.modifiers[i].name == 'rooms') {
+                        const res = await client.getJoinedRooms()
+                        let rooms: any = []
+                        for (let p = 0; p < res.length; p++) {
+                            let a = await client.getPublishedAlias(res[p])
+                            if (a) {
+                                rooms.push(a)
+                            }
+                        }
+                        for (let r = 0; r < rooms.length; r++) {
+                            rooms[r] = '<li>' + rooms[r] + '</li>'
+                        }
+                        await sendMsg(roomId, (await client.getUserProfile(await client.getUserId())).displayname + ' is a member of <b>' + res.length + '</b> rooms. Named rooms are: <ul>' + rooms.toString().replace(/,/g, '') + '</ul>', null, null, 'adminFunctions')             
+                    }
                 }
             }
-            for (let r = 0; r < rooms.length; r++) {
-                rooms[r] = '<li>' + rooms[r] + '</li>'
-            }
+        // } else if (active.action == 'memberships') {
+        //     const res = await client.getJoinedRooms()
+        //     let rooms: any = []
+        //     for (let p = 0; p < res.length; p++) {
+        //         let a = await client.getPublishedAlias(res[p])
+        //         if (a) {
+        //             rooms.push(a)
+        //         }
+        //     }
+        //     for (let r = 0; r < rooms.length; r++) {
+        //         rooms[r] = '<li>' + rooms[r] + '</li>'
+        //     }
 
-            await sendMsg(roomId, (await client.getUserProfile(await client.getUserId())).displayname + ' is a member of <b>' + res.length + '</b> rooms. Named rooms are: <ul>' + rooms.toString().replace(/,/g, '') + '</ul>', null, null, 'adminFunctions')
+        //     await sendMsg(roomId, (await client.getUserProfile(await client.getUserId())).displayname + ' is a member of <b>' + res.length + '</b> rooms. Named rooms are: <ul>' + rooms.toString().replace(/,/g, '') + '</ul>', null, null, 'adminFunctions')
         } else if (active.action == 'stats') {
             const res = await getStats()
             if (active.modifiers.length > 0) {
