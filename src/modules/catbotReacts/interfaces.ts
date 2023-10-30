@@ -1,6 +1,6 @@
 // CATBOT REACTS
 interface intReactions {
-    reactType?: String
+    reactType: String
     trigger: intReactTrigger[]
     emote: String // form of :partying:
     modifiers?: intReactTrigger[] //overrides emote if has both trigger.word and modifier.word
@@ -15,7 +15,24 @@ interface intReactTrigger {
     overrideEmote?: String // form of :partying:
 }
 
+interface intReactWords {
+    word: string
+    regex: RegExp
+    type: string
+    canPlural: boolean
+    canPossess: boolean
+    caseSensitive: boolean
+}
+
+interface intRegItem {
+    word: string
+    options: string
+}
+
 export {
     intReactions,
-    intReactTrigger
+    intReactTrigger,
+    intReactWords,
+    intRegItem,
+
 }
